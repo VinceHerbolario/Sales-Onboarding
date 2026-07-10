@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2B Sales Onboarding Manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!-- Firebase (cloud storage) — client-side SDK, works fine on GitHub Pages -->
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-firestore-compat.js"></script>
+<style>
+:root{
+  --navy:#1B2A4A;
+  --navy-light:#2C3F63;
+  --navy-pale:#EDF0F6;
+  --gold:#B08D46;
+  --gold-light:#E7D9B8;
+  --cream:#FAF8F4;
+  --paper:#FFFFFF;
+  --ink:#20242E;
+  --muted:#6B6F76;
+  --border:#E4E0D8;
+  --success:#3F7859;
+  --success-bg:#E7F1EA;
+  --warning:#B4791F;
+  --warning-bg:#FBF0DA;
+  --danger:#AE4230;
+  --danger-bg:#FBEAE5;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(27,42,74,.06), 0 8px 24px -12px rgba(27,42,74,.18);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--cream);
+  color:var(--ink);
+  font-family:'Inter',sans-serif;
+  font-size:14.5px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:'Fraunces',serif; color:var(--navy); margin:0;}
+.mono{font-family:'IBM Plex Mono',monospace;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit;}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  background:var(--navy);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 28px;
+  height:62px;
+  position:sticky; top:0; z-index:40;
+  box-shadow:0 2px 10px rgba(0,0,0,.15);
+}
+.brand{display:flex; align-items:center; gap:11px;}
+.brand-mark{
+  width:26px; height:26px;
+  background:var(--gold);
+  transform:rotate(45deg);
+  border-radius:5px;
+  flex-shrink:0;
+}
+.brand-text{display:flex; flex-direction:column; line-height:1.15;}
+.brand-text b{font-family:'Fraunces',serif; font-size:16.5px; font-weight:600;}
+.brand-text span{font-size:11px; color:#C9D2E4; letter-spacing:.03em;}
+
+.nav-tabs{display:flex; gap:4px; background:rgba(255,255,255,.08); padding:4px; border-radius:9px;}
+.nav-tab{
+  border:none; background:transparent; color:#D7DDEA;
+  padding:8px 16px; border-radius:6px; font-size:13.5px; font-weight:600;
+  letter-spacing:.01em; transition:.15s;
+}
+.nav-tab:hover{color:#fff;}
+.nav-tab.active{background:var(--paper); color:var(--navy);}
+
+.top-actions{display:flex; align-items:center; gap:14px;}
+.bell-wrap{position:relative;}
+.bell-btn{
+  background:rgba(255,255,255,.08); border:none; color:#fff;
+  width:38px; height:38px; border-radius:9px; position:relative;
+  display:flex; align-items:center; justify-content:center; font-size:17px;
+}
+.bell-btn:hover{background:rgba(255,255,255,.16);}
+.bell-badge{
+  position:absolute; top:-4px; right:-4px; background:var(--danger);
+  color:#fff; font-size:10.5px; font-weight:700; min-width:17px; height:17px;
+  border-radius:9px; display:flex; align-items:center; justify-content:center;
+  padding:0 4px; border:2px solid var(--navy);
+}
+.bell-panel{
+  position:absolute; top:48px; right:0; width:340px; background:var(--paper);
+  border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border);
+  color:var(--ink); display:none; overflow:hidden; z-index:50;
+}
+.bell-panel.open{display:block;}
+.bell-panel-head{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700; color:var(--navy); font-size:13.5px;}
+.bell-list{max-height:340px; overflow-y:auto;}
+.bell-item{padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.bell-item:last-child{border-bottom:none;}
+.bell-item-name{font-weight:600; font-size:13px;}
+.bell-item-owner{font-size:11.5px; color:var(--muted);}
+.bell-empty{padding:24px 16px; text-align:center; color:var(--muted); font-size:13px;}
+
+/* ---------- Layout ---------- */
+main{max-width:1180px; margin:0 auto; padding:30px 28px 80px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block; animation:fade .25s ease;}
+@keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+
+.page-head{margin-bottom:22px;}
+.page-head h1{font-size:26px; font-weight:600;}
+.page-head p{margin:6px 0 0; color:var(--muted); font-size:14px; max-width:680px;}
+
+.card{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
+.card-pad{padding:22px 24px;}
+
+/* ---------- Buttons ---------- */
+.btn{
+  display:inline-flex; align-items:center; gap:6px; border-radius:8px; border:1px solid transparent;
+  padding:9px 16px; font-size:13.5px; font-weight:600; transition:.15s; white-space:nowrap;
+}
+.btn-primary{background:var(--navy); color:#fff;}
+.btn-primary:hover{background:var(--navy-light);}
+.btn-gold{background:var(--gold); color:#fff;}
+.btn-gold:hover{background:#9a7938;}
+.btn-ghost{background:transparent; border-color:var(--border); color:var(--navy);}
+.btn-ghost:hover{background:var(--navy-pale);}
+.btn-danger-ghost{background:transparent; border-color:var(--border); color:var(--danger);}
+.btn-danger-ghost:hover{background:var(--danger-bg);}
+.btn-sm{padding:6px 11px; font-size:12.5px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.icon-btn{background:transparent; border:none; color:var(--muted); font-size:15px; padding:3px 6px; border-radius:5px;}
+.icon-btn:hover{background:var(--navy-pale); color:var(--navy);}
+
+/* ---------- Badges / pills ---------- */
+.badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; letter-spacing:.02em;}
+.badge-progress{background:var(--navy-pale); color:var(--navy-light);}
+.badge-ready{background:var(--warning-bg); color:var(--warning);}
+.badge-endorsed{background:var(--success-bg); color:var(--success);}
+.pill{font-size:10px; font-weight:700; letter-spacing:.03em; padding:2px 7px; border-radius:5px; text-transform:uppercase;}
+.pill-task{background:var(--navy-pale); color:var(--navy-light);}
+.pill-deliverable{background:var(--gold-light); color:#7A5F26;}
+.pill-custom{background:#EFE9F5; color:#6C4E96;}
+
+/* ---------- GUIDE TAB ---------- */
+.guide-section{margin-bottom:34px;}
+.guide-section h2{font-size:19px; font-weight:600; margin-bottom:12px; display:flex; align-items:center; gap:10px;}
+.guide-eyebrow{font-size:11px; font-weight:700; letter-spacing:.08em; color:var(--gold); text-transform:uppercase; margin-bottom:4px; display:block;}
+.lede{color:var(--ink); font-size:14.5px; max-width:760px;}
+.lede + .lede{margin-top:10px;}
+
+.roles-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:12px; margin-top:14px;}
+.role-card{padding:16px; border:1px solid var(--border); border-radius:9px; background:var(--paper);}
+.role-card b{color:var(--navy); font-size:13.5px; display:block; margin-bottom:6px;}
+.role-card p{margin:0; font-size:12.8px; color:var(--muted); line-height:1.5;}
+.role-target{display:inline-block; margin-top:10px; font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:600; letter-spacing:.02em; color:var(--navy); background:var(--gold-light); border:1px solid var(--gold); padding:3px 9px; border-radius:20px;}
+
+.stepper{display:flex; gap:3px; margin:16px 0;}
+.stepper-seg{flex:1; height:7px; border-radius:4px; background:var(--border);}
+.stepper-seg.done{background:var(--success);}
+.stepper-seg.ready{background:var(--warning);}
+
+.phase-accordion{border:1px solid var(--border); border-radius:9px; overflow:hidden; margin-top:14px;}
+.phase-row{border-bottom:1px solid var(--border);}
+.phase-row:last-child{border-bottom:none;}
+.phase-header{
+  display:flex; align-items:center; justify-content:space-between; padding:13px 16px;
+  cursor:pointer; background:var(--paper); transition:.15s;
+}
+.phase-header:hover{background:var(--navy-pale);}
+.phase-header-left{display:flex; align-items:center; gap:12px;}
+.phase-num{
+  width:26px; height:26px; border-radius:7px; background:var(--navy); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; font-family:'IBM Plex Mono',monospace; flex-shrink:0;
+}
+.phase-header-title{font-weight:600; font-size:13.8px; color:var(--ink);}
+.phase-header-owner{font-size:11.5px; color:var(--muted); margin-top:1px;}
+.chev{transition:.2s; color:var(--muted); font-size:12px;}
+.phase-row.open .chev{transform:rotate(90deg);}
+.phase-body{max-height:0; overflow:hidden; transition:max-height .25s ease; background:#FCFBF8;}
+.phase-row.open .phase-body{max-height:900px;}
+.phase-body-inner{padding:4px 16px 18px 54px;}
+.phase-obj{font-size:12.8px; color:var(--ink); margin:6px 0 12px; font-style:italic;}
+.phase-col-label{font-size:10.5px; font-weight:700; letter-spacing:.06em; color:var(--gold); text-transform:uppercase; margin:10px 0 6px;}
+.phase-list{margin:0; padding:0; list-style:none;}
+.phase-list li{font-size:12.8px; padding:3px 0; padding-left:14px; position:relative; color:var(--ink);}
+.phase-list li:before{content:"–"; position:absolute; left:0; color:var(--gold);}
+.phase-comp{font-size:12.3px; color:var(--navy-light); background:var(--navy-pale); padding:8px 10px; border-radius:6px; margin-top:10px;}
+
+.crit-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+.crit-card{border-radius:9px; padding:16px 18px;}
+.crit-yes{background:var(--warning-bg); border:1px solid #EBD4A6;}
+.crit-no{background:var(--success-bg); border:1px solid #C7E1D0;}
+.crit-card h4{font-size:13px; margin-bottom:8px;}
+.crit-yes h4{color:var(--warning);}
+.crit-no h4{color:var(--success);}
+.crit-card ul{margin:0; padding-left:18px; font-size:12.6px; color:var(--ink);}
+.crit-card li{margin-bottom:6px;}
+
+.comp-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:12.8px;}
+.comp-table th{background:var(--navy); color:#fff; text-align:left; padding:10px 14px; font-size:11px; letter-spacing:.04em; text-transform:uppercase;}
+.comp-table td{padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
+.comp-table tr:nth-child(even) td{background:#FBFAF7;}
+.comp-role{font-weight:700; color:var(--navy); white-space:nowrap;}
+
+@media (max-width:720px){.crit-grid{grid-template-columns:1fr;}}
+
+.flow-wrap{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:8px; overflow-x:auto;}
+.flow-wrap svg{display:block; min-width:820px; width:100%; height:auto;}
+.flow-note{font-size:12.6px; color:var(--muted); margin-top:12px; line-height:1.55;}
+
+/* ---------------- Gantt chart ---------------- */
+.gantt-meta{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.gantt-meta .chip{font-family:'IBM Plex Mono',monospace; font-size:11.5px; font-weight:600; padding:5px 12px; border-radius:20px; background:var(--navy-pale); color:var(--navy); border:1px solid var(--navy-light);}
+.gantt-wrap{background:var(--paper); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; overflow-x:auto;}
+.gantt-inner{min-width:1180px;}
+.gantt-header-row{display:grid; grid-template-columns:270px 1fr; align-items:end; padding-bottom:8px; margin-bottom:4px; border-bottom:2px solid var(--navy);}
+.gantt-header-label{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; padding-bottom:6px;}
+.gantt-ruler{position:relative; height:22px; background-image:linear-gradient(to right, var(--border) 1px, transparent 1px); background-size:calc(100%/9) 100%;}
+.gantt-ruler span{position:absolute; top:0; transform:translateX(-1px); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); font-weight:600;}
+.gantt-row{display:grid; grid-template-columns:270px 1fr; border-bottom:1px solid var(--border);}
+.gantt-row:last-child{border-bottom:none;}
+.gantt-label{display:flex; align-items:flex-start; gap:9px; padding:11px 12px 11px 0; cursor:pointer; user-select:none;}
+.gantt-label:hover .gantt-title{color:var(--gold-dark, #7A5D22);}
+.gantt-chevron{font-size:10px; color:var(--muted); margin-top:4px; transition:transform .15s; flex-shrink:0;}
+.gantt-row.open .gantt-chevron{transform:rotate(90deg);}
+.gantt-label-text{min-width:0;}
+.gantt-phase-num{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10px; font-weight:700; color:var(--navy); background:var(--gold-light); border:1px solid var(--gold); border-radius:10px; padding:1px 7px; margin-bottom:3px;}
+.gantt-title{display:block; font-size:12.6px; font-weight:600; color:var(--ink); line-height:1.3;}
+.gantt-owner{display:block; font-size:10.8px; color:var(--muted); margin-top:2px;}
+.gantt-track-wrap{position:relative; padding:9px 8px; background-image:linear-gradient(to right, var(--border) 1px, transparent 1px); background-size:calc(100%/9) 100%;}
+.gantt-bar{position:absolute; top:50%; transform:translateY(-50%); height:24px; border-radius:6px; background:var(--navy); display:flex; align-items:center; padding:0 10px; box-shadow:0 1px 2px rgba(27,42,74,.25);}
+.gantt-bar span{color:#fff; font-size:11px; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.gantt-bar.conditional{background:repeating-linear-gradient(135deg, var(--gold) 0 8px, #C79A4F 8px 16px); opacity:.92;}
+.gantt-bar.conditional span{color:var(--navy);}
+.gantt-daytag{position:absolute; top:50%; transform:translateY(-50%); font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--muted); font-weight:600; white-space:nowrap;}
+.gantt-sub{grid-column:1 / -1; display:none; padding:4px 22px 18px 34px; background:#FBFAF7; border-top:1px dashed var(--border);}
+.gantt-row.open .gantt-sub{display:block;}
+.gantt-sub-grid{display:grid; grid-template-columns:1fr 1fr; gap:22px; margin-top:10px;}
+@media (max-width:720px){.gantt-sub-grid{grid-template-columns:1fr;}}
+.gantt-sub h5{font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--gold-dark,#7A5D22); margin:0 0 7px;}
+.gantt-sub ul{margin:0; padding-left:17px;}
+.gantt-sub li{font-size:12.2px; color:var(--ink); line-height:1.55; margin-bottom:5px;}
+.gantt-legend{display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; font-size:12px; color:var(--muted);}
+.gantt-legend .lg-item{display:flex; align-items:center; gap:7px;}
+.gantt-legend .lg-swatch{width:20px; height:12px; border-radius:3px; background:var(--navy); flex-shrink:0;}
+.gantt-legend .lg-swatch.conditional{background:repeating-linear-gradient(135deg, var(--gold) 0 6px, #C79A4F 6px 12px);}
+
+.tier-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:14px;}
+.tier-card{border-radius:9px; padding:18px; border:1px solid var(--border); background:var(--paper); position:relative; overflow:hidden;}
+.tier-card:before{content:""; position:absolute; top:0; left:0; right:0; height:4px;}
+.tier-1:before{background:var(--gold);}
+.tier-2:before{background:var(--navy);}
+.tier-3:before{background:var(--muted);}
+.tier-badge{display:inline-block; font-family:'IBM Plex Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px; border-radius:20px; margin-bottom:10px;}
+.tier-1 .tier-badge{background:var(--gold-light); color:#7A5D22; border:1px solid var(--gold);}
+.tier-2 .tier-badge{background:var(--navy-pale); color:var(--navy); border:1px solid var(--navy-light);}
+.tier-3 .tier-badge{background:#EFEEEA; color:var(--muted); border:1px solid var(--border);}
+.tier-card h4{font-family:'Fraunces',serif; color:var(--navy); font-size:15.5px; margin:0 0 4px;}
+.tier-range{font-family:'IBM Plex Mono',monospace; font-size:13px; font-weight:600; color:var(--navy); margin-bottom:10px; display:block;}
+.tier-card p{margin:0; font-size:12.6px; color:var(--muted); line-height:1.55;}
+@media (max-width:900px){.tier-grid{grid-template-columns:1fr;}}
+
+/* ---------- CHECKLIST TAB ---------- */
+.checklist-toolbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.checklist-layout{display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start;}
+@media (max-width:860px){.checklist-layout{grid-template-columns:1fr;}}
+
+.acct-search{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; margin-bottom:10px;}
+.acct-list{display:flex; flex-direction:column; gap:7px; max-height:600px; overflow-y:auto;}
+.acct-item{
+  border:1px solid var(--border); border-radius:9px; padding:11px 12px; background:var(--paper);
+  cursor:pointer; transition:.15s;
+}
+.acct-item:hover{border-color:var(--gold);}
+.acct-item.active{border-color:var(--navy); background:var(--navy-pale);}
+.acct-item-top{display:flex; justify-content:space-between; align-items:flex-start; gap:6px;}
+.acct-item-name{font-weight:700; font-size:13px; color:var(--ink);}
+.acct-item-owner{font-size:11.3px; color:var(--muted); margin-top:1px;}
+.acct-item-bar{height:5px; background:var(--border); border-radius:3px; margin-top:9px; overflow:hidden;}
+.acct-item-bar-fill{height:100%; background:var(--navy); border-radius:3px;}
+.acct-item-pct{font-size:10.8px; color:var(--muted); margin-top:5px; font-family:'IBM Plex Mono',monospace;}
+.empty-state{padding:60px 20px; text-align:center; color:var(--muted);}
+.empty-state .em-icon{font-size:30px; margin-bottom:10px;}
+
+.detail-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:20px 24px; border-bottom:1px solid var(--border);}
+.detail-title h2{font-size:19px;}
+.detail-meta{font-size:12px; color:var(--muted); margin-top:4px;}
+.detail-progress-wrap{padding:18px 24px; border-bottom:1px solid var(--border);}
+.progress-big{height:10px; background:var(--border); border-radius:6px; overflow:hidden; margin:8px 0 6px;}
+.progress-big-fill{height:100%; background:var(--navy); border-radius:6px; transition:width .3s;}
+.progress-big-fill.ready{background:var(--warning);}
+.progress-big-fill.endorsed{background:var(--success);}
+.progress-label{display:flex; justify-content:space-between; font-size:12px; color:var(--muted);}
+
+.ready-banner{
+  margin:16px 24px 0; padding:13px 16px; border-radius:9px; background:var(--warning-bg);
+  border:1px solid #EBD4A6; display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.ready-banner strong{color:var(--warning); font-size:13.3px;}
+.ready-banner span{font-size:12px; color:#8A5E14;}
+.endorsed-banner{
+  margin:16px 24px 0; padding:13px 16px; border-radius:9px; background:var(--success-bg);
+  border:1px solid #C7E1D0; color:var(--success); font-size:13px; font-weight:600;
+}
+
+.checklist-body{padding:18px 24px 26px;}
+.phase-block{border:1px solid var(--border); border-radius:9px; margin-bottom:10px; overflow:hidden;}
+.phase-block-head{
+  display:flex; justify-content:space-between; align-items:center; padding:11px 14px;
+  background:var(--paper); cursor:pointer;
+}
+.phase-block-head:hover{background:var(--navy-pale);}
+.phase-block-count{font-size:11.5px; color:var(--muted); font-family:'IBM Plex Mono',monospace;}
+.phase-block-body{display:none; padding:6px 14px 14px 14px; background:#FCFBF8;}
+.phase-block.open .phase-block-body{display:block;}
+.phase-block.open .chev{transform:rotate(90deg);}
+
+.item-row{display:flex; align-items:flex-start; gap:10px; padding:7px 4px; border-radius:6px;}
+.item-row:hover{background:#F3F1EB;}
+.item-row input[type=checkbox]{width:16px; height:16px; margin-top:2px; accent-color:var(--navy); flex-shrink:0; cursor:pointer;}
+.item-text{flex:1; font-size:13px; line-height:1.45;}
+.item-text.done{color:var(--muted); text-decoration:line-through;}
+.item-remove{opacity:0; transition:.15s;}
+.item-row:hover .item-remove{opacity:1;}
+
+.add-item-row{display:flex; gap:6px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border);}
+.add-item-row input[type=text]{flex:1; padding:7px 9px; border:1px solid var(--border); border-radius:6px; font-size:12.5px;}
+.add-item-row select{padding:7px 8px; border:1px solid var(--border); border-radius:6px; font-size:12.3px;}
+
+/* ---------- DASHBOARD TAB ---------- */
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+@media (max-width:800px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{padding:18px 20px;}
+.stat-card .stat-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; font-weight:600;}
+.stat-card .stat-value{font-family:'IBM Plex Mono',monospace; font-size:28px; font-weight:600; color:var(--navy); margin-top:6px;}
+.stat-card .stat-sub{font-size:11.5px; color:var(--muted); margin-top:3px;}
+
+.alerts-section{margin-bottom:22px;}
+.alert-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-top:12px;}
+.alert-card{
+  border:1px solid #EBD4A6; background:var(--warning-bg); border-radius:9px; padding:14px 16px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.alert-card-name{font-weight:700; font-size:13.5px; color:#7A5410;}
+.alert-card-owner{font-size:11.5px; color:#8A5E14;}
+
+table.acct-table{width:100%; border-collapse:collapse; font-size:12.8px;}
+table.acct-table th{
+  text-align:left; padding:10px 14px; background:var(--navy); color:#fff; font-size:10.8px;
+  letter-spacing:.04em; text-transform:uppercase; position:sticky; top:0; z-index:2;
+  box-shadow:0 1px 0 rgba(0,0,0,.15);
+}
+table.acct-table td{padding:11px 14px; border-bottom:1px solid var(--border); vertical-align:middle;}
+table.acct-table tr:hover td{background:#FBFAF7;}
+.dash-table-wrap{max-height:560px; overflow:auto; border-radius:var(--radius);}
+.mini-stepper{display:flex; gap:2px; width:120px;}
+.mini-seg{flex:1; height:6px; border-radius:2px; background:var(--border);}
+.mini-seg.done{background:var(--navy);}
+
+/* ---------- Modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(27,32,44,.5); display:none;
+  align-items:center; justify-content:center; z-index:100; padding:20px;
+}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--paper); border-radius:12px; width:100%; max-width:420px; box-shadow:var(--shadow); overflow:hidden;}
+.modal-head{padding:18px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;}
+.modal-head h3{font-size:16px;}
+.modal-body{padding:20px 22px;}
+.modal-foot{padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12px; font-weight:600; color:var(--navy); margin-bottom:5px;}
+.field input, .field select{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-size:13px;}
+
+/* library modal */
+.lib-phase{border:1px solid var(--border); border-radius:8px; margin-bottom:10px; padding:12px 14px;}
+.lib-phase h4{font-size:12.8px; color:var(--navy); margin-bottom:8px;}
+.lib-item-row{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12.5px;}
+.lib-item-row span{flex:1;}
+
+/* ---------- Toasts ---------- */
+#toast-container{position:fixed; bottom:22px; right:22px; display:flex; flex-direction:column; gap:8px; z-index:200;}
+.toast{
+  background:var(--navy); color:#fff; padding:12px 18px; border-radius:9px; font-size:13px;
+  box-shadow:var(--shadow); display:flex; align-items:center; gap:10px; min-width:240px;
+  animation:toastIn .2s ease;
+}
+.toast.success{background:var(--success);}
+.toast.warn{background:var(--warning);}
+@keyframes toastIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+
+.sr-only{position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0);}
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-thumb{background:#D7D2C6; border-radius:5px;}
+</style>
+</head>
+<body>
+
+<div id="fbSetupGate" style="display:none; position:fixed; inset:0; z-index:999; background:rgba(27,42,74,.92); align-items:center; justify-content:center; padding:24px; overflow-y:auto;">
+  <div style="background:#FFFFFF; border-radius:14px; max-width:640px; width:100%; padding:32px 34px; font-family:'Inter',sans-serif; color:#20242E; box-shadow:0 20px 60px rgba(0,0,0,.35); margin:24px 0;">
+    <h2 style="font-family:'Fraunces',serif; color:#1B2A4A; margin:0 0 6px;">🔧 One-time setup: connect Firebase</h2>
+    <p style="color:#6B6F76; font-size:13.5px; line-height:1.6; margin:0 0 18px;">This app now saves everything to the cloud (Firebase Cloud Firestore) instead of the browser, so every device sees the same clinic accounts, checklists, and notifications. It just needs to be pointed at a free Firebase project once.</p>
+    <ol style="font-size:13.5px; line-height:1.9; color:#20242E; padding-left:20px; margin:0 0 18px;">
+      <li>Go to <a href="https://console.firebase.google.com/" target="_blank" rel="noopener">console.firebase.google.com</a> → <b>Add project</b> (the free Spark plan is enough).</li>
+      <li>In the new project, open <b>Build → Firestore Database</b> → <b>Create database</b> (start in <i>production mode</i>).</li>
+      <li>Go to <b>Project settings</b> (gear icon) → scroll to <b>Your apps</b> → click the <b>&lt;/&gt; Web</b> icon → register the app (no hosting needed).</li>
+      <li>Copy the <code>firebaseConfig</code> object it shows you.</li>
+      <li>Open <code>index.html</code> in a text editor, find <code>const firebaseConfig = {...}</code> near the top of the <code>&lt;script&gt;</code> section, and paste your values in.</li>
+      <li>In Firestore → <b>Rules</b>, publish rules so the app can read/write its one collection — see the comment above <code>firebaseConfig</code> in the code for a starter rule set.</li>
+      <li>Save the file and reload this page (and re-publish to GitHub Pages if that's where it's hosted).</li>
+    </ol>
+    <p style="font-size:12.5px; color:#6B6F76; margin:0;">This message only appears because <code>firebaseConfig</code> still has its placeholder values.</p>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <b>B2B Sales Onboarding Manual</b>
+      <span>B2B Affiliate &amp; Partnerships</span>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" data-tab="guide">Guide</button>
+    <button class="nav-tab" data-tab="flowchart">Flowchart</button>
+    <button class="nav-tab" data-tab="gantt">Gantt Chart</button>
+    <button class="nav-tab" data-tab="checklist">Checklist</button>
+    <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+  </div>
+  <div class="top-actions">
+    <div class="bell-wrap">
+      <button class="bell-btn" id="bellBtn" title="Ready to endorse">
+        &#128276;
+        <span class="bell-badge" id="bellBadge" style="display:none;">0</span>
+      </button>
+      <div class="bell-panel" id="bellPanel">
+        <div class="bell-panel-head">Ready to endorse to Clinic Success</div>
+        <div class="bell-list" id="bellList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- ===================== GUIDE TAB ===================== -->
+  <section class="tab-panel active" id="tab-guide">
+    <div class="page-head">
+      <h1>B2B Sales Onboarding Manual</h1>
+      <p>Clinic Partner Onboarding Framework — from first contact to Clinic Success handover. Reference this guide, then track live accounts in the Checklist tab.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Purpose</span>
+      <h2>Why this framework exists</h2>
+      <p class="lede">The Account Manager must be competent enough to run the full sales presentation and qualify a clinic without medical support in most cases. The Medical Team is a conditional resource, engaged only when a clinic's clinical questions genuinely exceed the Account Manager's own knowledge — never a default step in the funnel.</p>
+      <p class="lede">This guide covers every phase from prospecting through the formal handover to Clinic Success, and applies to Jr. Account Managers, Account Managers, and the Head of Affiliate &amp; Partnerships. Jr. Account Managers and Account Managers carry identical roles and responsibilities across the funnel — the two positions are differentiated by monthly revenue target, not by scope of work.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Roles</span>
+      <h2>Ownership overview</h2>
+      <div class="roles-grid" id="rolesGrid"></div>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Lead qualification</span>
+      <h2>Clinic qualification matrix</h2>
+      <p class="lede">Use this matrix during prospecting and qualification (Phases 1 and 4) to score how much monthly revenue a lead can realistically generate, and prioritize accordingly.</p>
+      <div class="tier-grid" id="tierGrid"></div>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Process</span>
+      <h2>Phase-by-phase framework</h2>
+      <p class="lede">Click a phase to see its tasks, deliverables, and required competency.</p>
+      <div class="phase-accordion" id="guidePhaseAccordion"></div>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Decision point</span>
+      <h2>Is a Medical Presentation needed?</h2>
+      <p class="lede">Default to <b>No</b>. Escalate to the Medical Team only when one of the criteria on the left is clearly met.</p>
+      <div class="crit-grid">
+        <div class="crit-card crit-yes">
+          <h4>Escalate to Medical when —</h4>
+          <ul id="critYes"></ul>
+        </div>
+        <div class="crit-card crit-no">
+          <h4>Proceed without Medical when —</h4>
+          <ul id="critNo"></ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Capability</span>
+      <h2>Sales team competency framework</h2>
+      <table class="comp-table" id="compTable">
+        <thead><tr><th>Role</th><th>Required competencies</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-eyebrow">Definition of done</span>
+      <h2>Handover criteria to Clinic Success</h2>
+      <p class="lede">A clinic is not ready for Clinic Success until every item below is true — mirrored automatically by the Checklist tab.</p>
+      <ul class="phase-list" id="handoverCriteriaList" style="max-width:640px;"></ul>
+    </div>
+  </section>
+
+  <!-- ===================== FLOWCHART TAB ===================== -->
+  <section class="tab-panel" id="tab-flowchart">
+    <div class="page-head">
+      <h1>Sales Onboarding Process Flow</h1>
+      <p>The full clinic onboarding journey in one view — from first contact to Clinic Success handover, with every decision point and retry loop mapped against the phase framework in the Guide tab.</p>
+    </div>
+    <div class="flow-wrap">
+<svg viewBox="0 0 980 2130" xmlns="http://www.w3.org/2000/svg" font-family="Inter, sans-serif">
+<defs>
+  <marker id="arrowNavy" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#1B2A4A"/></marker>
+  <marker id="arrowGreen" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#3F7859"/></marker>
+  <marker id="arrowAmber" markerWidth="9" markerHeight="9" refX="7.5" refY="4.5" orient="auto"><path d="M0,0 L9,4.5 L0,9 Z" fill="#B4791F"/></marker>
+</defs>
+<rect x="0" y="0" width="980" height="2130" fill="#FAF8F4"/>
+<text x="490.0" y="30" text-anchor="middle" font-size="20" font-weight="700" fill="#1B2A4A" font-family="Fraunces, serif">B2B Sales Onboarding — Process Flow</text>
+<path d="M380,114.0 L380,175.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M380,295.0 L380,370.0" fill="none" stroke="#3F7859" stroke-width="2.25" marker-end="url(#arrowGreen)"/>
+<rect x="391.2" y="319.5" width="37.6" height="22" rx="11" fill="#E7F1EA" stroke="#3F7859" stroke-width="1.25"/>
+<text x="410" y="336.5" text-anchor="middle" font-size="12" font-weight="700" fill="#3F7859">YES</text>
+<path d="M380,440.0 L380,515.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M380,635.0 L380,710.0" fill="none" stroke="#3F7859" stroke-width="2.25" marker-end="url(#arrowGreen)"/>
+<rect x="391.2" y="659.5" width="37.6" height="22" rx="11" fill="#E7F1EA" stroke="#3F7859" stroke-width="1.25"/>
+<text x="410" y="676.5" text-anchor="middle" font-size="12" font-weight="700" fill="#3F7859">YES</text>
+<path d="M380,780.0 L380,855.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M380,975.0 L380,1025.0" fill="none" stroke="#3F7859" stroke-width="2.25" marker-end="url(#arrowGreen)"/>
+<rect x="391.2" y="987.0" width="37.6" height="22" rx="11" fill="#E7F1EA" stroke="#3F7859" stroke-width="1.25"/>
+<text x="410" y="1004.0" text-anchor="middle" font-size="12" font-weight="700" fill="#3F7859">YES</text>
+<path d="M380,1145.0 L380,1220.0" fill="none" stroke="#3F7859" stroke-width="2.25" marker-end="url(#arrowGreen)"/>
+<rect x="391.2" y="1169.5" width="37.6" height="22" rx="11" fill="#E7F1EA" stroke="#3F7859" stroke-width="1.25"/>
+<text x="410" y="1186.5" text-anchor="middle" font-size="12" font-weight="700" fill="#3F7859">YES</text>
+<path d="M380,1290.0 L380,1365.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M380,1485.0 L380,1560.0" fill="none" stroke="#3F7859" stroke-width="2.25" marker-end="url(#arrowGreen)"/>
+<rect x="391.2" y="1509.5" width="37.6" height="22" rx="11" fill="#E7F1EA" stroke="#3F7859" stroke-width="1.25"/>
+<text x="410" y="1526.5" text-anchor="middle" font-size="12" font-weight="700" fill="#3F7859">YES</text>
+<path d="M380,1630.0 L380,1700.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M380,1770.0 L380,1826.0" fill="none" stroke="#1B2A4A" stroke-width="2.25" marker-end="url(#arrowNavy)"/>
+<path d="M490.0,235 L575.0,235 L575.0,70 L510.0,70" fill="none" stroke="#B4791F" stroke-width="2.25" marker-end="url(#arrowAmber)" stroke-dasharray="6,4"/>
+<rect x="510.50000000000006" y="204" width="30.4" height="22" rx="11" fill="#FBF0DA" stroke="#B4791F" stroke-width="1.25"/>
+<text x="525.7" y="221" text-anchor="middle" font-size="12" font-weight="700" fill="#B4791F">NO</text>
+<path d="M490.0,575 L575.0,575 L575.0,405 L530.0,405" fill="none" stroke="#B4791F" stroke-width="2.25" marker-end="url(#arrowAmber)" stroke-dasharray="6,4"/>
+<rect x="510.50000000000006" y="544" width="30.4" height="22" rx="11" fill="#FBF0DA" stroke="#B4791F" stroke-width="1.25"/>
+<text x="525.7" y="561" text-anchor="middle" font-size="12" font-weight="700" fill="#B4791F">NO</text>
+<text x="583.0" y="490.0" font-size="10.5" fill="#7A5D22" font-style="italic">follow up 3·5·7·15d, then monthly</text>
+<path d="M490.0,915 L575.0,915 L575.0,745 L530.0,745" fill="none" stroke="#B4791F" stroke-width="2.25" marker-end="url(#arrowAmber)" stroke-dasharray="6,4"/>
+<rect x="510.50000000000006" y="884" width="30.4" height="22" rx="11" fill="#FBF0DA" stroke="#B4791F" stroke-width="1.25"/>
+<text x="525.7" y="901" text-anchor="middle" font-size="12" font-weight="700" fill="#B4791F">NO</text>
+<text x="583.0" y="830.0" font-size="10.5" fill="#7A5D22" font-style="italic">follow up 3·5·7·15d, then monthly</text>
+<path d="M490.0,1085 L640.0,1085 L640.0,745 L530.0,745" fill="none" stroke="#B4791F" stroke-width="2.25" marker-end="url(#arrowAmber)" stroke-dasharray="6,4"/>
+<rect x="537.8" y="1054" width="30.4" height="22" rx="11" fill="#FBF0DA" stroke="#B4791F" stroke-width="1.25"/>
+<text x="553.0" y="1071" text-anchor="middle" font-size="12" font-weight="700" fill="#B4791F">NO</text>
+<text x="648.0" y="915.0" font-size="10.5" fill="#7A5D22" font-style="italic">follow up 3·5·7·15d, then monthly</text>
+<path d="M490.0,1425 L575.0,1425 L575.0,1255 L530.0,1255" fill="none" stroke="#B4791F" stroke-width="2.25" marker-end="url(#arrowAmber)" stroke-dasharray="6,4"/>
+<rect x="510.50000000000006" y="1394" width="30.4" height="22" rx="11" fill="#FBF0DA" stroke="#B4791F" stroke-width="1.25"/>
+<text x="525.7" y="1411" text-anchor="middle" font-size="12" font-weight="700" fill="#B4791F">NO</text>
+<text x="583.0" y="1340.0" font-size="10.5" fill="#7A5D22" font-style="italic">revise MOU &amp; reissue for signature</text>
+<ellipse cx="380" cy="70" rx="130.0" ry="44.0" fill="#1B2A4A" stroke="#B08D46" stroke-width="2.5"/>
+<text x="380" y="68" text-anchor="middle" font-size="15.5" font-weight="700" fill="#FFFFFF">Initiate Contact</text>
+<text x="380" y="88" text-anchor="middle" font-size="11" font-weight="500" fill="#C9D2E4">SMS · DSMS · Call · In-person</text>
+<rect x="244.0" y="-1.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="273.6" y="13.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 1</text>
+<polygon points="380,175.0 490.0,235 380,295.0 270.0,235" fill="#E7D9B8" stroke="#B08D46" stroke-width="2"/>
+<text x="380" y="231" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Sales Intro</text>
+<text x="380" y="250" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Secured?</text>
+<rect x="264.0" y="148.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="293.6" y="162.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 2</text>
+<rect x="230.0" y="370.0" width="300" height="70" rx="10" fill="#1B2A4A"/>
+<text x="380" y="410" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">Schedule Product Presentation</text>
+<rect x="224.0" y="343.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="253.6" y="357.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 3</text>
+<polygon points="380,515.0 490.0,575 380,635.0 270.0,575" fill="#E7D9B8" stroke="#B08D46" stroke-width="2"/>
+<text x="380" y="571" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Schedule</text>
+<text x="380" y="590" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Confirmed?</text>
+<rect x="264.0" y="488.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="293.6" y="502.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 3</text>
+<rect x="230.0" y="710.0" width="300" height="70" rx="10" fill="#1B2A4A"/>
+<text x="380" y="741" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">Sales Presentation</text>
+<text x="380" y="760" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">&amp; Qualification</text>
+<rect x="224.0" y="683.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="253.6" y="697.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 4</text>
+<polygon points="380,855.0 490.0,915 380,975.0 270.0,915" fill="#E7D9B8" stroke="#B08D46" stroke-width="2"/>
+<text x="380" y="911" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Presentation</text>
+<text x="380" y="930" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Delivered?</text>
+<rect x="264.0" y="828.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="293.6" y="842.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 4</text>
+<polygon points="380,1025.0 490.0,1085 380,1145.0 270.0,1085" fill="#E7D9B8" stroke="#B08D46" stroke-width="2"/>
+<text x="380" y="1081" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Clinic</text>
+<text x="380" y="1100" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Interested?</text>
+<rect x="264.0" y="998.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="293.6" y="1012.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 6</text>
+<rect x="230.0" y="1220.0" width="300" height="70" rx="10" fill="#1B2A4A"/>
+<text x="380" y="1260" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">MOU Creation</text>
+<rect x="224.0" y="1193.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="253.6" y="1207.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 7</text>
+<polygon points="380,1365.0 490.0,1425 380,1485.0 270.0,1425" fill="#E7D9B8" stroke="#B08D46" stroke-width="2"/>
+<text x="380" y="1421" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">MOU</text>
+<text x="380" y="1440" text-anchor="middle" font-size="14" font-weight="700" fill="#1B2A4A">Signed?</text>
+<rect x="264.0" y="1338.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="293.6" y="1352.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 8</text>
+<rect x="230.0" y="1560.0" width="300" height="70" rx="10" fill="#1B2A4A"/>
+<text x="380" y="1591" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">Payment &amp; Delivery</text>
+<text x="380" y="1610" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">Terms Follow-Up</text>
+<rect x="224.0" y="1533.0" width="59.199999999999996" height="20" rx="10" fill="#B08D46"/>
+<text x="253.6" y="1547.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 9</text>
+<rect x="230.0" y="1700.0" width="300" height="70" rx="10" fill="#1B2A4A"/>
+<text x="380" y="1740" text-anchor="middle" font-size="14.5" font-weight="600" fill="#FFFFFF">Onboarded</text>
+<rect x="224.0" y="1673.0" width="65.8" height="20" rx="10" fill="#B08D46"/>
+<text x="256.9" y="1687.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 10</text>
+<ellipse cx="380" cy="1870" rx="150.0" ry="44.0" fill="#1B2A4A" stroke="#B08D46" stroke-width="2.5"/>
+<text x="380" y="1874" text-anchor="middle" font-size="15.5" font-weight="700" fill="#FFFFFF">Clinic Success Handover</text>
+<rect x="224.0" y="1799.0" width="65.8" height="20" rx="10" fill="#B08D46"/>
+<text x="256.9" y="1813.0" text-anchor="middle" font-size="10" font-weight="700" fill="#1B2A4A" letter-spacing="0.04em">PHASE 11</text>
+
+<g>
+  <rect x="20" y="2016" width="940" height="70" rx="10" fill="#FFFFFF" stroke="#E4E0D8" stroke-width="1"/>
+  <line x1="42" y1="2038" x2="76" y2="2038" stroke="#1B2A4A" stroke-width="2.5" marker-end="url(#arrowNavy)"/>
+  <text x="86" y="2043" font-size="12.5" fill="#20242E" font-weight="600">Standard progression</text>
+  <line x1="42" y1="2064" x2="76" y2="2064" stroke="#3F7859" stroke-width="2.5" marker-end="url(#arrowGreen)"/>
+  <text x="86" y="2069" font-size="12.5" fill="#20242E" font-weight="600">Yes — proceed to next phase</text>
+  <line x1="330" y1="2038" x2="364" y2="2038" stroke="#B4791F" stroke-width="2.5" stroke-dasharray="6,4" marker-end="url(#arrowAmber)"/>
+  <text x="374" y="2043" font-size="12.5" fill="#20242E" font-weight="600">No — retry after follow-up cadence</text>
+  <rect x="330" y="2055" width="16" height="16" rx="3" fill="#E7D9B8" stroke="#B08D46" stroke-width="1.5" transform="rotate(45 338 2063)"/>
+  <text x="358" y="2069" font-size="12.5" fill="#20242E" font-weight="600">Decision point</text>
+</g>
+
+</svg>
+    </div>
+    <p class="flow-note">Green solid arrows mean the clinic clears that step and the deal moves forward to the next phase. Amber dashed arrows mean the answer is "not yet" — the account owner runs the standard follow-up cadence (3, 5, 7, 15 days, then monthly), logs the outcome, and loops back to retry rather than dropping the lead. See the Clinic Qualification Matrix and Handover Criteria in the Guide tab for how to score and finalize each stage.</p>
+  </section>
+
+  <!-- ===================== GANTT CHART TAB ===================== -->
+  <section class="tab-panel" id="tab-gantt">
+    <div class="page-head">
+      <h1>45-Day Onboarding Gantt Chart</h1>
+      <p>Target timeline for every phase, task, and deliverable from first contact to Clinic Success handover. Click a phase to expand its full task and deliverable list.</p>
+    </div>
+    <div class="gantt-meta">
+      <span class="chip">Target sales cycle: 45 days</span>
+      <span class="chip">11 phases</span>
+      <span class="chip" id="ganttItemCount">— tasks &amp; deliverables</span>
+    </div>
+    <div class="gantt-wrap">
+      <div class="gantt-inner">
+        <div class="gantt-header-row">
+          <div class="gantt-header-label">Phase</div>
+          <div class="gantt-ruler" id="ganttRuler"></div>
+        </div>
+        <div id="ganttBody"></div>
+      </div>
+    </div>
+    <div class="gantt-legend">
+      <div class="lg-item"><span class="lg-swatch"></span> Standard phase window</div>
+      <div class="lg-item"><span class="lg-swatch conditional"></span> Conditional phase (only if triggered)</div>
+      <div class="lg-item">▸ Click a row to view its tasks &amp; deliverables</div>
+    </div>
+    <p class="flow-note">Day ranges are target windows within the 45-day cycle, not fixed calendar dates — some phases overlap by design (e.g. the Medical Presentation runs in parallel with follow-up/negotiation). Actual pacing per clinic should still follow the follow-up cadence defined in the Guide and Flowchart tabs.</p>
+  </section>
+
+  <!-- ===================== CHECKLIST TAB ===================== -->
+  <section class="tab-panel" id="tab-checklist">
+    <div class="page-head">
+      <h1>Account Checklist</h1>
+      <p>Track every task and deliverable per clinic partner. Add or remove items any time to keep the checklist current — this data is shared with the whole team.</p>
+    </div>
+
+    <div class="checklist-toolbar">
+      <button class="btn btn-ghost btn-sm" id="openLibraryBtn">⚙ Manage checklist template</button>
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ghost btn-sm" id="exportExcelBtnChecklist">⬇ Download Excel</button>
+        <button class="btn btn-primary" id="newAccountBtn">+ New account</button>
+      </div>
+    </div>
+
+    <div class="checklist-layout">
+      <div class="card" style="padding:16px;">
+        <input type="text" class="acct-search" id="acctSearch" placeholder="Search accounts…">
+        <div class="acct-list" id="acctList"></div>
+      </div>
+
+      <div class="card" id="detailCard">
+        <div class="empty-state" id="detailEmpty">
+          <div class="em-icon">📋</div>
+          <div>Select an account on the left, or create a new one to start its checklist.</div>
+        </div>
+        <div id="detailContent" style="display:none;"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== DASHBOARD TAB ===================== -->
+  <section class="tab-panel" id="tab-dashboard">
+    <div class="page-head" style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;">
+      <div>
+        <h1>Portfolio Dashboard</h1>
+        <p>Live status across every clinic partner in the sales pipeline.</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" id="exportExcelBtnDashboard" style="flex-shrink:0;">⬇ Download Excel</button>
+    </div>
+
+    <div class="stat-grid">
+      <div class="card stat-card">
+        <div class="stat-label">Total accounts</div>
+        <div class="stat-value" id="statTotal">0</div>
+        <div class="stat-sub">in the pipeline</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Avg. completion</div>
+        <div class="stat-value" id="statAvg">0%</div>
+        <div class="stat-sub">across all accounts</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Ready to endorse</div>
+        <div class="stat-value" id="statReady">0</div>
+        <div class="stat-sub">100% complete, not yet endorsed</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-label">Endorsed to CS</div>
+        <div class="stat-value" id="statEndorsed">0</div>
+        <div class="stat-sub">handed over to Clinic Success</div>
+      </div>
+    </div>
+
+    <div class="alerts-section" id="alertsSection" style="display:none;">
+      <h2 style="font-size:17px;">🔔 Ready to endorse</h2>
+      <div class="alert-cards" id="alertCards"></div>
+    </div>
+
+    <div class="card dash-table-wrap">
+      <table class="acct-table">
+        <thead>
+          <tr>
+            <th>Clinic</th><th>Owner</th><th>Phase progress</th><th>Completed</th><th>%</th><th>Status</th><th>Created</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="dashTableBody"></tbody>
+      </table>
+    </div>
+  </section>
+
+</main>
+
+<!-- New Account Modal -->
+<div class="modal-overlay" id="newAcctModal">
+  <div class="modal">
+    <div class="modal-head"><h3>New account</h3><button class="icon-btn" data-close-modal="newAcctModal">✕</button></div>
+    <div class="modal-body">
+      <div class="field"><label>Clinic / partner name</label><input type="text" id="newAcctName" placeholder="e.g. Riverstone Dental Clinic"></div>
+      <div class="field"><label>Account owner</label><input type="text" id="newAcctOwner" placeholder="e.g. Maria Santos"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-ghost" data-close-modal="newAcctModal">Cancel</button>
+      <button class="btn btn-primary" id="createAcctBtn">Create account</button>
+    </div>
+  </div>
+</div>
+
+<!-- Manage Library Modal -->
+<div class="modal-overlay" id="libraryModal">
+  <div class="modal" style="max-width:600px;">
+    <div class="modal-head">
+      <h3>Manage checklist template</h3>
+      <button class="icon-btn" data-close-modal="libraryModal">✕</button>
+    </div>
+    <div class="modal-body" style="max-height:60vh; overflow-y:auto;">
+      <p style="font-size:12.5px; color:var(--muted); margin-top:0;">Changes here update the default template used for <b>new</b> accounts. Existing accounts keep their own checklist — edit those directly from the account view.</p>
+      <div id="libraryPhases"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-primary" data-close-modal="libraryModal">Done</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+
+<script>
+/* ============================================================
+   DATA: default checklist template (seed) + guide reference data
+   ============================================================ */
+const PHASE_META = [
+  {num:1, title:"Prospecting & Initial Contact", owner:"Jr. Account Manager",
+   objective:"Establish first contact with a target clinic and secure enough interest to move into a Sales Introduction.",
+   competency:"Prospecting and lead research, outreach scripting, rapport building, CRM data entry discipline."},
+  {num:2, title:"Sales Introduction", owner:"Jr. Account Manager / Account Manager",
+   objective:"Confirm the clinic's basic interest and readiness to receive a full sales presentation.",
+   competency:"Active listening, needs-discovery questioning, foundational product knowledge, clean lead handoff."},
+  {num:3, title:"Schedule Product Presentation", owner:"Account Manager",
+   objective:"Secure a confirmed date and time for the full sales presentation with the right stakeholders present.",
+   competency:"Stakeholder coordination, consultative-selling preparation, deck customization."},
+  {num:4, title:"Sales Presentation & Qualification", owner:"Account Manager",
+   objective:"Deliver a competent sales presentation and qualify the clinic thoroughly — including whether a Medical Presentation is genuinely required.",
+   competency:"Full presentation delivery, objection handling, qualification frameworks, working clinical literacy, sound decision judgment."},
+  {num:5, title:"Medical Presentation (Conditional)", owner:"Account Manager + Medical Team",
+   objective:"Address clinical or technical questions that exceed the Account Manager's competency, without losing ownership of the relationship.",
+   competency:"Cross-functional coordination, technical briefing/hand-off writing, relationship-continuity management."},
+  {num:6, title:"Interested — Follow-Up & Negotiation", owner:"Account Manager",
+   objective:"Nurture confirmed interest into a firm commitment to proceed with an MOU.",
+   competency:"Negotiation, structured persistence, closing-signal recognition."},
+  {num:7, title:"MOU Creation", owner:"Account Manager / Head of Affiliate & Partnerships",
+   objective:"Formalize agreed terms into an MOU that is accurate and internally approved.",
+   competency:"MOU/contract drafting fundamentals, terms accuracy, escalation protocol."},
+  {num:8, title:"MOU Signing", owner:"Account Manager",
+   objective:"Secure a fully signed, mutually agreed MOU from the clinic — and revise it if needed.",
+   competency:"Closing discipline, follow-through, document tracking, attention to detail."},
+  {num:9, title:"Payment & Delivery Terms Follow-Up", owner:"Account Manager",
+   objective:"Confirm the clinic has fulfilled the initial commercial terms of the MOU before onboarding is considered complete.",
+   competency:"Commercial/financial acumen, follow-up discipline, cross-department coordination."},
+  {num:10, title:"Onboarded", owner:"Account Manager",
+   objective:"Confirm every pre-handover requirement is complete and the clinic file is ready for Clinic Success.",
+   competency:"Documentation accuracy, summarization, quality-assurance mindset."},
+  {num:11, title:"Clinic Success Handover", owner:"Account Manager → Clinic Success",
+   objective:"Transition the clinic relationship to Clinic Success with zero information loss and a warm introduction.",
+   competency:"Relationship-transition management, clear communication, cross-team collaboration."},
+];
+
+const DEFAULT_LIBRARY_ITEMS = {
+  1: {tasks:["Research target clinic: specialty, size, location, estimated patient volume",
+             "Initiate contact via SMS, DSMS, call, or in-person visit",
+             "Identify and verify the correct decision-maker (owner, clinic manager, or medical director)",
+             "Deliver a brief company/product introduction to gauge interest",
+             "Log the contact attempt and clinic profile in the CRM"],
+      deliverables:["CRM entry with clinic profile and contact log","Lead source and outreach channel tagged","Verified decision-maker name and contact details"]},
+  2: {tasks:["Conduct a brief discovery conversation on needs, pain points, and current situation",
+             "Explain the value proposition at a high level",
+             "Gauge receptiveness and mark status as \"Sales Intro Done\" in the CRM",
+             "Hand off the lead to the assigned Account Manager, if initiated by the Jr. Account Manager"],
+      deliverables:["Discovery notes (needs, pain points, current supplier/situation)","\"Sales Intro Done\" status logged in CRM","Preliminary clinic-fit notes for the Account Manager"]},
+  3: {tasks:["Propose presentation date/time options to the clinic","Confirm which decision-makers will attend",
+             "Send calendar invite and a preview of materials","Customize the presentation deck to the clinic's profile and needs",
+             "Run a pre-presentation qualification check (budget signal, authority, need, timeline)",
+             "Follow-up: cadence at 3, 5, 7 and 15 days after, then monthly, if not yet confirmed",
+             "Follow-up: log the outcome of each follow-up attempt","Follow-up: update lead status — confirmed, nurture, or disqualified"],
+      deliverables:["Confirmed calendar invite (\"Schedule Confirmed\")","Pre-Presentation Qualification Checklist","Clinic-customized presentation deck","Follow-up log with outcomes"]},
+  4: {tasks:["Deliver the full sales presentation: product, pricing, value proposition, case studies",
+             "Conduct in-depth qualification using BANT / MEDDIC","Handle objections raised during the presentation",
+             "Assess the clinical complexity of the clinic's questions against own competency",
+             "Decide whether a Medical Presentation is required (see qualification criteria)",
+             "Mark status as \"Presentation Done\" in the CRM"],
+      deliverables:["Documented sales presentation delivery","Qualification Scorecard (BANT / MEDDIC)","Clinic Needs & Fit Assessment","Medical Presentation decision (Yes/No) with written justification"]},
+  5: {tasks:["Submit a Medical Presentation Request with justification, clinic profile, and open questions",
+             "Schedule the session with the Medical Team and the clinic","Attend the session to preserve relationship continuity",
+             "Capture the clinical Q&A outcomes for the deal record"],
+      deliverables:["Medical Presentation Request Form","Confirmed schedule with Medical Team and clinic","Medical Presentation delivered","Clinical Q&A summary notes"]},
+  6: {tasks:["Follow up on a fixed cadence: 3, 5, 7, 15 days after, then monthly","Resolve remaining objections or open questions",
+             "Reconfirm alignment with all relevant decision-makers","Negotiate preliminary commercial terms"],
+      deliverables:["Follow-up log with outcomes","Verbal or written commitment to proceed","Preliminary terms notes"]},
+  7: {tasks:["Draft the MOU based on negotiated terms","Route the draft for internal review and approval","Send the approved MOU to the clinic for review"],
+      deliverables:["Draft MOU","Internal approval sign-off","MOU sent to clinic"]},
+  8: {tasks:["Facilitate any final clinic review or questions","Coordinate signatures from both parties","Track and confirm signature status in the CRM",
+             "Follow-up: capture the clinic's requested revisions, if any","Follow-up: route revisions through internal approval","Follow-up: reissue the MOU for signature"],
+      deliverables:["Fully signed MOU","Revised MOU version log","Re-signed MOU, if applicable"]},
+  9: {tasks:["Confirm payment terms and schedule with the clinic","Coordinate delivery and logistics terms","Follow up on the initial payment or purchase order",
+             "Escalate delays to the Business Development Director when needed"],
+      deliverables:["Payment confirmation record","Delivery/logistics confirmation","Purchase order or invoice initiated"]},
+  10:{tasks:["Complete the full Onboarding Checklist, verifying every prior deliverable","Prepare the Clinic Handover Brief: profile, needs, agreed terms, history, key contacts, special notes",
+             "Submit the file for internal QA review by the Head of Affiliate & Partnerships"],
+      deliverables:["Completed Onboarding Checklist","Clinic Handover Brief"]},
+  11:{tasks:["Schedule a handover meeting with the Clinic Success team","Walk through the Clinic Handover Brief in full",
+             "Introduce the clinic's primary contact to the Clinic Success representative","Obtain formal sign-off/acceptance from Clinic Success"],
+      deliverables:["Handover meeting held","Clinic Success acceptance sign-off","Clinic officially transitioned out of the sales pipeline"]},
+};
+
+const ROLES = [
+  {role:"Jr. Account Manager", desc:"Same end-to-end role as the Account Manager — prospecting, sales presentation, qualification, MOU, and handover. Differentiated by monthly revenue target, not by scope of work.", target:"Monthly target: ₱1.5M"},
+  {role:"Account Manager", desc:"Same end-to-end role as the Jr. Account Manager — prospecting, sales presentation, qualification, MOU, and handover. Differentiated by monthly revenue target, not by scope of work.", target:"Monthly target: ₱2M"},
+  {role:"Head of Affiliate & Partnerships", desc:"Owns the end-to-end sales process for referrals from existing affiliates, and drives demand generation for new leads, which are then endorsed to the Jr. Account Managers and Account Managers for onboarding."},
+  {role:"Business Development Director", desc:"Final escalation point for the sales team across all phases of the onboarding framework. Steps in when an issue cannot be resolved at the Account Manager or Head of Affiliate & Partnerships level."},
+  {role:"Medical Team", desc:"Delivers the Medical Presentation only when clinical questions exceed the Account Manager's competency."},
+  {role:"Clinic Success Team", desc:"Receives the fully onboarded clinic and owns the relationship post-handover."},
+];
+
+const QUALIFICATION_TIERS = [
+  {cls:"tier-1", tier:"Tier 1", label:"Key Account Potential", range:"₱1,000,000+ / month",
+   desc:"Leads with the patient volume, capacity, and commercial profile to grow into a key account — a clinic capable of sustaining at least ₱1M in revenue per month. Highest priority for onboarding."},
+  {cls:"tier-2", tier:"Tier 2", label:"Mid-Tier Potential", range:"₱300,000 – ₱900,000 / month",
+   desc:"Leads with solid, sustainable order potential in the ₱300K–₱900K monthly range. Strong secondary priority once Tier 1 accounts are in motion."},
+  {cls:"tier-3", tier:"Tier 3", label:"Entry-Tier Potential", range:"Below ₱300,000 / month",
+   desc:"Leads generating under ₱300K per month, and sometimes inconsistent in ordering month to month. Onboard opportunistically; not a prospecting priority."},
+];
+
+const CRIT_YES = [
+  "The clinic's questions concern clinical efficacy, safety data, or procedure-specific protocols beyond the Account Manager's working knowledge",
+  "A medical director or practicing physician expects a peer-level clinical discussion",
+  "The clinic raises regulatory, compliance, or contraindication questions requiring specialist input",
+  "The clinic explicitly requests clinical case studies or data the Account Manager cannot credibly present",
+];
+const CRIT_NO = [
+  "The Account Manager can confidently answer all product, clinical-overview, and efficacy questions raised",
+  "The clinic's concerns are primarily commercial (pricing, logistics, terms) rather than clinical",
+  "No specific clinical stakeholder has requested a specialist-level discussion",
+];
+
+const COMPETENCY_MATRIX = [
+  {role:"Jr. Account Manager", items:["Lead research and prospecting","Outreach scripting (SMS/DSMS/call/in-person)","Rapport building","Active listening & basic needs discovery","CRM data entry and lead hygiene","Clean handoff protocol"]},
+  {role:"Account Manager", items:["Full sales presentation delivery","BANT / MEDDIC qualification","Objection handling and negotiation","Working clinical literacy","Judgment on when Medical is truly needed","MOU drafting fundamentals","Follow-up cadence discipline","Cross-functional coordination"]},
+  {role:"Head of Affiliate & Partnerships", items:["End-to-end ownership of existing-affiliate referral sales","Demand generation for new leads","Lead endorsement to Jr. Account Managers / Account Managers","MOU and commercial-terms approval","Sales coaching","QA of onboarding files","Partnership strategy"]},
+  {role:"Business Development Director", items:["Final escalation resolution across all phases","Commercial judgment calls beyond team authority","Cross-functional arbitration"]},
+];
+
+const HANDOVER_CRITERIA = [
+  "Sales presentation delivered and logged as \"Presentation Done\"",
+  "Qualification Scorecard (BANT/MEDDIC) completed and on file",
+  "Medical Presentation decision logged, and delivered if required",
+  "MOU fully signed by both parties, including any approved revisions",
+  "Initial payment confirmed and delivery/logistics terms agreed",
+  "Onboarding Checklist 100% complete",
+  "Clinic Handover Brief prepared and QA-reviewed",
+  "Handover meeting scheduled and accepted by Clinic Success",
+];
+
+function buildDefaultLibrary(){
+  return PHASE_META.map(p=>{
+    const src = DEFAULT_LIBRARY_ITEMS[p.num];
+    const items = [];
+    src.tasks.forEach((t,i)=> items.push({id:`p${p.num}-t${i}`, text:t, type:'task'}));
+    src.deliverables.forEach((d,i)=> items.push({id:`p${p.num}-d${i}`, text:d, type:'deliverable'}));
+    return {phaseNum:p.num, phaseTitle:p.title, items};
+  });
+}
+
+/* ============================================================
+   FIREBASE CLOUD FIRESTORE — SETUP
+   ============================================================
+   1) Create a free project at https://console.firebase.google.com/
+   2) Build → Firestore Database → Create database (production mode).
+   3) Project settings → Your apps → "</>" Web → register app → copy
+      the config object below into firebaseConfig.
+   4) Firestore → Rules → publish something like this (open access to
+      just this app's one collection; lock down further if you want
+      per-clinic accounts/auth later):
+
+      rules_version = '2';
+      service cloud.firestore {
+        match /databases/{database}/documents {
+          match /onboarding_data/{docId} {
+            allow read, write: if true;
+          }
+        }
+      }
+
+   That's it — this file is a static page, so GitHub Pages (or any
+   static host) keeps working exactly as before; Firestore is called
+   directly from the browser.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBV4Fny2AWkF8kAuEh_NHAEmvFVfW6v6BU",
+  authDomain: "sales-onboarding-manual-abd6f.firebaseapp.com",
+  projectId: "sales-onboarding-manual-abd6f",
+  storageBucket: "sales-onboarding-manual-abd6f.firebasestorage.app",
+  messagingSenderId: "655117965019",
+  appId: "1:655117965019:web:1fb8d2bf23e110487cdefe",
+  measurementId: "G-F6WDE08F2X"
+};
+const FIRESTORE_COLLECTION = 'onboarding_data';
+
+let db = null;
+let firebaseReady = false;
+
+function isFirebaseConfigured(){
+  return !!(firebaseConfig.apiKey && firebaseConfig.apiKey !== 'YOUR_API_KEY'
+    && firebaseConfig.projectId && firebaseConfig.projectId !== 'YOUR_PROJECT_ID');
+}
+
+if(isFirebaseConfigured()){
+  try{
+    firebase.initializeApp(firebaseConfig);
+    db = firebase.firestore();
+    // Best-effort offline cache so brief connectivity drops don't lose clicks;
+    // safe to ignore failures (e.g. multiple tabs open).
+    db.enablePersistence({synchronizeTabs:true}).catch(()=>{});
+    firebaseReady = true;
+  }catch(e){
+    console.error('Firebase init failed', e);
+  }
+}
+
+/* ============================================================
+   STORAGE HELPERS (backed by Cloud Firestore)
+   ============================================================ */
+async function sGet(key){
+  try{
+    const snap = await db.collection(FIRESTORE_COLLECTION).doc(key).get();
+    if(!snap.exists) return null;
+    const data = snap.data();
+    return data && 'value' in data ? data.value : null;
+  }catch(e){ console.error('Firestore get failed', key, e); return null; }
+}
+async function sSet(key, value){
+  try{
+    await db.collection(FIRESTORE_COLLECTION).doc(key).set({
+      value,
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    });
+    return true;
+  }catch(e){
+    console.error('Firestore set failed', key, e);
+    toast('⚠️ Could not save to the cloud — check your connection', 'warn');
+    return null;
+  }
+}
+async function sDelete(key){
+  try{ await db.collection(FIRESTORE_COLLECTION).doc(key).delete(); return true; }
+  catch(e){ console.error('Firestore delete failed', key, e); return null; }
+}
+
+/* ============================================================
+   REAL-TIME SYNC — keeps every open device/tab in sync automatically
+   ============================================================ */
+let unsubAccounts = null;
+let unsubLibrary = null;
+const checklistUnsubs = {};
+
+function listenAccounts(){
+  if(unsubAccounts) unsubAccounts();
+  unsubAccounts = db.collection(FIRESTORE_COLLECTION).doc('accounts')
+    .onSnapshot(snap=>{
+      if(!snap.exists) return;
+      const data = snap.data();
+      state.accounts = (data && data.value) ? data.value : [];
+      syncChecklistListeners();
+      renderChecklistSidebar();
+      if(state.activeAccountId){
+        if(state.accounts.find(a=>a.id===state.activeAccountId)){
+          renderAccountDetail();
+        } else {
+          state.activeAccountId = null;
+          document.getElementById('detailEmpty').style.display='block';
+          document.getElementById('detailContent').style.display='none';
+        }
+      }
+      if(state.activeTab==='dashboard') refreshDashboardStatsOnly();
+      updateBell();
+    }, err=> console.error('accounts listener error', err));
+}
+
+function listenLibrary(){
+  if(unsubLibrary) unsubLibrary();
+  unsubLibrary = db.collection(FIRESTORE_COLLECTION).doc('task-library')
+    .onSnapshot(snap=>{
+      if(!snap.exists) return;
+      const data = snap.data();
+      if(data && data.value && data.value.length){
+        state.library = data.value;
+        const modal = document.getElementById('libraryModal');
+        if(modal && modal.classList.contains('open')) renderLibraryModal();
+      }
+    }, err=> console.error('library listener error', err));
+}
+
+function syncChecklistListeners(){
+  const activeIds = new Set(state.accounts.map(a=>a.id));
+  Object.keys(checklistUnsubs).forEach(id=>{
+    if(!activeIds.has(id)){ checklistUnsubs[id](); delete checklistUnsubs[id]; }
+  });
+  activeIds.forEach(id=>{
+    if(checklistUnsubs[id]) return;
+    checklistUnsubs[id] = db.collection(FIRESTORE_COLLECTION).doc(`checklist:${id}`)
+      .onSnapshot(snap=>{
+        if(!snap.exists) return;
+        const data = snap.data();
+        if(!data || !data.value) return;
+        state.checklistCache[id] = data.value;
+        if(state.activeAccountId === id) renderAccountDetail();
+        renderChecklistSidebar();
+        if(state.activeTab==='dashboard') refreshDashboardStatsOnly();
+        updateBell();
+      }, err=> console.error('checklist listener error', id, err));
+  });
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+const state = {
+  library: [],
+  accounts: [],
+  checklistCache: {},
+  activeAccountId: null,
+  activeTab: 'guide',
+  openPhaseIds: new Set(),
+};
+
+function uid(prefix){ return prefix + '-' + Math.random().toString(36).slice(2,9); }
+
+function computeStats(items){
+  const total = items.length;
+  const completed = items.filter(i=>i.completed).length;
+  const percent = total ? Math.round((completed/total)*100) : 0;
+  return {total, completed, percent};
+}
+
+async function getChecklist(accountId){
+  if(state.checklistCache[accountId]) return state.checklistCache[accountId];
+  let data = await sGet(`checklist:${accountId}`, true);
+  if(!data){
+    data = {items: seedItemsFromLibrary()};
+    await sSet(`checklist:${accountId}`, data, true);
+  }
+  state.checklistCache[accountId] = data;
+  return data;
+}
+function seedItemsFromLibrary(){
+  const items = [];
+  state.library.forEach(phase=>{
+    phase.items.forEach(li=>{
+      items.push({id: uid('it'), phaseNum: phase.phaseNum, phaseTitle: phase.phaseTitle, text: li.text, type: li.type, completed:false, completedAt:null});
+    });
+  });
+  return items;
+}
+async function saveChecklist(accountId){
+  state.checklistCache[accountId] = state.checklistCache[accountId];
+  await sSet(`checklist:${accountId}`, state.checklistCache[accountId], true);
+}
+async function saveAccounts(){ await sSet('accounts', state.accounts, true); }
+async function saveLibrary(){ await sSet('task-library', state.library, true); }
+
+/* ============================================================
+   TOASTS
+   ============================================================ */
+function toast(msg, kind){
+  const c = document.getElementById('toast-container');
+  const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' '+kind : '');
+  el.textContent = msg;
+  c.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+
+/* ============================================================
+   INIT
+   ============================================================ */
+async function initApp(){
+  let lib = await sGet('task-library', true);
+  if(!lib || !lib.length){ lib = buildDefaultLibrary(); await sSet('task-library', lib, true); }
+  state.library = lib;
+
+  let accts = await sGet('accounts', true);
+  if(!accts){ accts = []; await sSet('accounts', accts, true); }
+  state.accounts = accts;
+
+  renderGuide();
+  renderGantt();
+  renderChecklistSidebar();
+  await renderDashboard();
+  renderChecklistSidebar();
+  updateBell();
+
+  // Live cloud sync: reflect changes made from any device automatically.
+  syncChecklistListeners();
+  listenAccounts();
+  listenLibrary();
+}
+
+/* ============================================================
+   GUIDE TAB RENDER
+   ============================================================ */
+/* ============================================================
+   GANTT CHART: 45-day target sales cycle
+   ============================================================ */
+const CYCLE_DAYS = 45;
+const GANTT_TIMELINE = [
+  {num:1,  start:1,  end:3,  conditional:false},
+  {num:2,  start:3,  end:5,  conditional:false},
+  {num:3,  start:5,  end:12, conditional:false},
+  {num:4,  start:12, end:16, conditional:false},
+  {num:5,  start:16, end:19, conditional:true},
+  {num:6,  start:16, end:26, conditional:false},
+  {num:7,  start:26, end:31, conditional:false},
+  {num:8,  start:31, end:37, conditional:false},
+  {num:9,  start:37, end:41, conditional:false},
+  {num:10, start:41, end:43, conditional:false},
+  {num:11, start:43, end:45, conditional:false},
+];
+
+function renderGantt(){
+  const ruler = document.getElementById('ganttRuler');
+  if(!ruler) return;
+  let rulerHtml = '';
+  for(let d=0; d<=CYCLE_DAYS; d+=5){
+    const leftPct = (d/CYCLE_DAYS*100).toFixed(2);
+    const style = d===0 ? `left:0;` : (d===CYCLE_DAYS ? `left:calc(100% - 30px);` : `left:${leftPct}%;`);
+    rulerHtml += `<span style="${style}">D${d}</span>`;
+  }
+  ruler.innerHTML = rulerHtml;
+
+  let totalItems = 0;
+  const body = document.getElementById('ganttBody');
+  body.innerHTML = GANTT_TIMELINE.map(t=>{
+    const meta = PHASE_META.find(p=>p.num===t.num);
+    const items = DEFAULT_LIBRARY_ITEMS[t.num] || {tasks:[],deliverables:[]};
+    totalItems += items.tasks.length + items.deliverables.length;
+    const leftPct = ((t.start-1)/CYCLE_DAYS*100).toFixed(2);
+    const widthPctNum = Math.max((t.end-t.start)/CYCLE_DAYS*100, 3);
+    const widthPct = widthPctNum.toFixed(2);
+    const barClass = t.conditional ? 'gantt-bar conditional' : 'gantt-bar';
+    const dayLabel = `Day ${t.start}–${t.end}${t.conditional?' (if needed)':''}`;
+    const labelOnRight = (t.start-1)/CYCLE_DAYS > 0.62; // flip day-tag to the left if bar sits far right
+    const tagStyle = labelOnRight
+      ? `right:calc(${(100-parseFloat(leftPct)).toFixed(2)}% + 8px);`
+      : `left:calc(${leftPct}% + ${widthPct}% + 8px);`;
+    const showBarText = widthPctNum >= 9;
+    return `
+    <div class="gantt-row" data-phase="${t.num}">
+      <div class="gantt-label" onclick="toggleGanttRow(${t.num})">
+        <span class="gantt-chevron">▶</span>
+        <span class="gantt-label-text">
+          <span class="gantt-phase-num">PHASE ${t.num}</span>
+          <span class="gantt-title">${esc(meta.title)}</span>
+          <span class="gantt-owner">${esc(meta.owner)}</span>
+        </span>
+      </div>
+      <div class="gantt-track-wrap">
+        <div class="${barClass}" style="left:${leftPct}%; width:${widthPct}%;" title="${escAttr(meta.title)} — ${escAttr(dayLabel)}">
+          ${showBarText ? `<span>${esc(meta.title)}</span>` : ''}
+        </div>
+        <span class="gantt-daytag" style="${tagStyle}">${esc(dayLabel)}</span>
+      </div>
+      <div class="gantt-sub">
+        <div class="gantt-sub-grid">
+          <div>
+            <h5>Tasks</h5>
+            <ul>${items.tasks.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+          </div>
+          <div>
+            <h5>Deliverables</h5>
+            <ul>${items.deliverables.map(x=>`<li>${esc(x)}</li>`).join('')}</ul>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const countChip = document.getElementById('ganttItemCount');
+  if(countChip) countChip.textContent = `${totalItems} tasks & deliverables`;
+}
+
+function toggleGanttRow(num){
+  const row = document.querySelector(`.gantt-row[data-phase="${num}"]`);
+  if(row) row.classList.toggle('open');
+}
+
+function renderGuide(){
+  document.getElementById('rolesGrid').innerHTML = ROLES.map(r=>`
+    <div class="role-card"><b>${esc(r.role)}</b><p>${esc(r.desc)}</p>${r.target?`<span class="role-target">${esc(r.target)}</span>`:''}</div>`).join('');
+
+  document.getElementById('guidePhaseAccordion').innerHTML = PHASE_META.map(p=>{
+    const src = DEFAULT_LIBRARY_ITEMS[p.num];
+    return `
+    <div class="phase-row" data-phase="${p.num}">
+      <div class="phase-header" onclick="togglePhaseRow(this)">
+        <div class="phase-header-left">
+          <div class="phase-num">${p.num}</div>
+          <div>
+            <div class="phase-header-title">${esc(p.title)}</div>
+            <div class="phase-header-owner">${esc(p.owner)}</div>
+          </div>
+        </div>
+        <div class="chev">▶</div>
+      </div>
+      <div class="phase-body">
+        <div class="phase-body-inner">
+          <div class="phase-obj">${esc(p.objective)}</div>
+          <div class="phase-col-label">Tasks</div>
+          <ul class="phase-list">${src.tasks.map(t=>`<li>${esc(t)}</li>`).join('')}</ul>
+          <div class="phase-col-label">Deliverables</div>
+          <ul class="phase-list">${src.deliverables.map(d=>`<li>${esc(d)}</li>`).join('')}</ul>
+          <div class="phase-comp"><b>Core competency:</b> ${esc(p.competency)}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('tierGrid').innerHTML = QUALIFICATION_TIERS.map(t=>`
+    <div class="tier-card ${t.cls}">
+      <span class="tier-badge">${esc(t.tier)}</span>
+      <h4>${esc(t.label)}</h4>
+      <span class="tier-range">${esc(t.range)}</span>
+      <p>${esc(t.desc)}</p>
+    </div>`).join('');
+
+  document.getElementById('critYes').innerHTML = CRIT_YES.map(t=>`<li>${esc(t)}</li>`).join('');
+  document.getElementById('critNo').innerHTML = CRIT_NO.map(t=>`<li>${esc(t)}</li>`).join('');
+
+  document.querySelector('#compTable tbody').innerHTML = COMPETENCY_MATRIX.map(r=>`
+    <tr><td class="comp-role">${esc(r.role)}</td><td>${r.items.map(esc).join(' · ')}</td></tr>`).join('');
+
+  document.getElementById('handoverCriteriaList').innerHTML = HANDOVER_CRITERIA.map(t=>`<li>${esc(t)}</li>`).join('');
+}
+function togglePhaseRow(headerEl){
+  headerEl.parentElement.classList.toggle('open');
+}
+
+/* ============================================================
+   ESCAPE HELPER
+   ============================================================ */
+function esc(str){
+  return String(str).replace(/[&<>"']/g, s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+}
+
+/* ============================================================
+   CHECKLIST TAB
+   ============================================================ */
+function renderChecklistSidebar(){
+  const q = (document.getElementById('acctSearch').value || '').toLowerCase();
+  const list = document.getElementById('acctList');
+  const filtered = state.accounts.filter(a => a.name.toLowerCase().includes(q));
+
+  if(!filtered.length){
+    list.innerHTML = `<div class="empty-state" style="padding:26px 8px;"><div class="em-icon">🗂️</div><div>${state.accounts.length? 'No accounts match your search.' : 'No accounts yet. Create the first one.'}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(a=>{
+    const cached = state.checklistCache[a.id];
+    const stats = cached ? computeStats(cached.items) : null;
+    const pct = stats ? stats.percent : 0;
+    const active = a.id === state.activeAccountId ? 'active' : '';
+    return `
+    <div class="acct-item ${active}" data-id="${a.id}" onclick="selectAccount('${a.id}')">
+      <div class="acct-item-top">
+        <div>
+          <div class="acct-item-name">${esc(a.name)}</div>
+          <div class="acct-item-owner">${esc(a.owner || 'Unassigned')}</div>
+        </div>
+        ${a.endorsedAt ? '<span class="badge badge-endorsed">Endorsed</span>' : (pct===100 ? '<span class="badge badge-ready">Ready</span>' : '')}
+      </div>
+      <div class="acct-item-bar"><div class="acct-item-bar-fill" style="width:${pct}%"></div></div>
+      <div class="acct-item-pct">${stats ? `${stats.completed}/${stats.total} · ${pct}%` : 'Loading…'}</div>
+    </div>`;
+  }).join('');
+}
+
+async function selectAccount(id){
+  state.activeAccountId = id;
+  document.getElementById('detailEmpty').style.display = 'none';
+  document.getElementById('detailContent').style.display = 'block';
+  await getChecklist(id);
+  renderChecklistSidebar();
+  renderAccountDetail();
+}
+
+function renderAccountDetail(){
+  const account = state.accounts.find(a=>a.id===state.activeAccountId);
+  if(!account) return;
+  const checklist = state.checklistCache[account.id];
+  const stats = computeStats(checklist.items);
+  const isEndorsed = !!account.endorsedAt;
+  const isReady = stats.percent === 100 && !isEndorsed;
+
+  const byPhase = {};
+  checklist.items.forEach(it=>{
+    const key = it.phaseNum ?? 'custom';
+    if(!byPhase[key]) byPhase[key] = {phaseNum:it.phaseNum, phaseTitle: it.phaseTitle || 'Custom items', items:[]};
+    byPhase[key].items.push(it);
+  });
+  const phaseKeys = Object.keys(byPhase).sort((a,b)=>{
+    if(a==='custom') return 1; if(b==='custom') return -1;
+    return Number(a)-Number(b);
+  });
+
+  const fillClass = isEndorsed ? 'endorsed' : (isReady ? 'ready' : '');
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-head">
+      <div class="detail-title">
+        <h2>${esc(account.name)}</h2>
+        <div class="detail-meta">Owner: ${esc(account.owner || 'Unassigned')} · Created ${new Date(account.createdAt).toLocaleDateString()}</div>
+      </div>
+      <div style="display:flex; gap:8px; align-items:flex-start;">
+        ${isEndorsed ? '<span class="badge badge-endorsed">Endorsed</span>' : (isReady ? '<span class="badge badge-ready">Ready</span>' : '<span class="badge badge-progress">In progress</span>')}
+        <button class="icon-btn" title="Delete account" onclick="deleteAccount('${account.id}')">🗑</button>
+      </div>
+    </div>
+
+    <div class="detail-progress-wrap">
+      <div class="progress-label"><span>${stats.completed} of ${stats.total} items complete</span><span class="mono">${stats.percent}%</span></div>
+      <div class="progress-big"><div class="progress-big-fill ${fillClass}" style="width:${stats.percent}%"></div></div>
+    </div>
+
+    ${isReady ? `
+      <div class="ready-banner">
+        <div><strong>All tasks complete.</strong><br><span>This account is ready to endorse to Clinic Success.</span></div>
+        <button class="btn btn-gold btn-sm" onclick="endorseAccount('${account.id}')">Endorse to Clinic Success</button>
+      </div>` : ''}
+    ${isEndorsed ? `<div class="endorsed-banner">✓ Endorsed to Clinic Success on ${new Date(account.endorsedAt).toLocaleDateString()}</div>` : ''}
+
+    <div class="checklist-body">
+      ${phaseKeys.map(k=>{
+        const group = byPhase[k];
+        const gs = computeStats(group.items);
+        const isOpen = state.openPhaseIds.has(account.id+'-'+k);
+        return `
+        <div class="phase-block ${isOpen?'open':''}" data-key="${k}">
+          <div class="phase-block-head" onclick="togglePhaseBlock('${account.id}','${k}')">
+            <div style="display:flex; align-items:center; gap:10px;">
+              <span class="chev">▶</span>
+              <strong style="font-size:13px;">${group.phaseNum ? 'Phase '+group.phaseNum+' — ' : ''}${esc(group.phaseTitle)}</strong>
+            </div>
+            <span class="phase-block-count">${gs.completed}/${gs.total}</span>
+          </div>
+          <div class="phase-block-body">
+            ${group.items.map(it=>`
+              <div class="item-row">
+                <input type="checkbox" ${it.completed?'checked':''} onchange="toggleItem('${account.id}','${it.id}', this.checked)">
+                <div class="item-text ${it.completed?'done':''}">${esc(it.text)} <span class="pill pill-${it.type}">${it.type}</span></div>
+                <button class="icon-btn item-remove" title="Remove item" onclick="removeItem('${account.id}','${it.id}')">✕</button>
+              </div>`).join('')}
+            <div class="add-item-row">
+              <input type="text" placeholder="Add a task or deliverable…" id="addinput-${account.id}-${k}">
+              <select id="addtype-${account.id}-${k}">
+                <option value="task">Task</option>
+                <option value="deliverable">Deliverable</option>
+              </select>
+              <button class="btn btn-ghost btn-sm" onclick="addItem('${account.id}', ${group.phaseNum ?? 'null'}, '${escAttr(group.phaseTitle)}', '${k}')">Add</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+}
+function escAttr(s){ return esc(s).replace(/'/g, "&#39;"); }
+
+function togglePhaseBlock(accountId, key){
+  const setKey = accountId+'-'+key;
+  if(state.openPhaseIds.has(setKey)) state.openPhaseIds.delete(setKey);
+  else state.openPhaseIds.add(setKey);
+  renderAccountDetail();
+}
+
+async function toggleItem(accountId, itemId, checked){
+  const checklist = state.checklistCache[accountId];
+  const item = checklist.items.find(i=>i.id===itemId);
+  if(!item) return;
+  const wasComplete = computeStats(checklist.items).percent === 100;
+  item.completed = checked;
+  item.completedAt = checked ? new Date().toISOString() : null;
+  await saveChecklist(accountId);
+  renderAccountDetail();
+  renderChecklistSidebar();
+  const nowComplete = computeStats(checklist.items).percent === 100;
+  const account = state.accounts.find(a=>a.id===accountId);
+  if(nowComplete && !wasComplete && account && !account.endorsedAt){
+    toast(`🎉 ${account.name} is ready to endorse to Clinic Success`, 'warn');
+  }
+  updateBell();
+  refreshDashboardStatsOnly();
+}
+
+async function addItem(accountId, phaseNum, phaseTitle, key){
+  const input = document.getElementById(`addinput-${accountId}-${key}`);
+  const typeSel = document.getElementById(`addtype-${accountId}-${key}`);
+  const text = input.value.trim();
+  if(!text) return;
+  const checklist = state.checklistCache[accountId];
+  checklist.items.push({
+    id: uid('it'),
+    phaseNum: phaseNum === null || phaseNum === undefined || isNaN(phaseNum) ? null : Number(phaseNum),
+    phaseTitle: phaseTitle,
+    text, type: typeSel.value, completed:false, completedAt:null
+  });
+  await saveChecklist(accountId);
+  input.value='';
+  renderAccountDetail();
+  renderChecklistSidebar();
+  refreshDashboardStatsOnly();
+  toast('Item added to checklist');
+}
+
+async function removeItem(accountId, itemId){
+  const checklist = state.checklistCache[accountId];
+  checklist.items = checklist.items.filter(i=>i.id!==itemId);
+  await saveChecklist(accountId);
+  renderAccountDetail();
+  renderChecklistSidebar();
+  updateBell();
+  refreshDashboardStatsOnly();
+}
+
+async function endorseAccount(accountId){
+  const account = state.accounts.find(a=>a.id===accountId);
+  if(!account) return;
+  account.endorsedAt = new Date().toISOString();
+  await saveAccounts();
+  renderAccountDetail();
+  renderChecklistSidebar();
+  updateBell();
+  await renderDashboard();
+  toast(`${account.name} endorsed to Clinic Success ✓`, 'success');
+}
+
+async function deleteAccount(accountId){
+  const account = state.accounts.find(a=>a.id===accountId);
+  if(!account) return;
+  if(!confirm(`Delete "${account.name}"? This removes its checklist permanently.`)) return;
+  state.accounts = state.accounts.filter(a=>a.id!==accountId);
+  delete state.checklistCache[accountId];
+  await saveAccounts();
+  await sDelete(`checklist:${accountId}`, true);
+  if(state.activeAccountId === accountId){
+    state.activeAccountId = null;
+    document.getElementById('detailEmpty').style.display='block';
+    document.getElementById('detailContent').style.display='none';
+  }
+  renderChecklistSidebar();
+  updateBell();
+  await renderDashboard();
+  toast('Account deleted');
+}
+
+/* New account modal */
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+document.getElementById('newAccountBtn').addEventListener('click', ()=>{
+  document.getElementById('newAcctName').value='';
+  document.getElementById('newAcctOwner').value='';
+  openModal('newAcctModal');
+});
+document.getElementById('exportExcelBtnChecklist').addEventListener('click', exportToExcel);
+document.getElementById('exportExcelBtnDashboard').addEventListener('click', exportToExcel);
+document.querySelectorAll('[data-close-modal]').forEach(btn=>{
+  btn.addEventListener('click', ()=> closeModal(btn.getAttribute('data-close-modal')));
+});
+document.getElementById('createAcctBtn').addEventListener('click', async ()=>{
+  const name = document.getElementById('newAcctName').value.trim();
+  const owner = document.getElementById('newAcctOwner').value.trim();
+  if(!name){ toast('Enter a clinic name'); return; }
+  const account = {id: uid('acct'), name, owner, createdAt: new Date().toISOString(), endorsedAt: null};
+  state.accounts.push(account);
+  await saveAccounts();
+  state.checklistCache[account.id] = {items: seedItemsFromLibrary()};
+  await saveChecklist(account.id);
+  closeModal('newAcctModal');
+  renderChecklistSidebar();
+  await selectAccount(account.id);
+  await renderDashboard();
+  toast(`${name} added to the pipeline`);
+});
+document.getElementById('acctSearch').addEventListener('input', renderChecklistSidebar);
+
+/* Manage library modal */
+document.getElementById('openLibraryBtn').addEventListener('click', ()=>{
+  renderLibraryModal();
+  openModal('libraryModal');
+});
+function renderLibraryModal(){
+  document.getElementById('libraryPhases').innerHTML = state.library.map(phase=>`
+    <div class="lib-phase">
+      <h4>Phase ${phase.phaseNum} — ${esc(phase.phaseTitle)}</h4>
+      ${phase.items.map(it=>`
+        <div class="lib-item-row">
+          <span class="pill pill-${it.type}">${it.type}</span>
+          <span>${esc(it.text)}</span>
+          <button class="icon-btn" onclick="removeLibraryItem(${phase.phaseNum}, '${it.id}')">✕</button>
+        </div>`).join('')}
+      <div class="add-item-row">
+        <input type="text" placeholder="Add default item to this phase…" id="libadd-${phase.phaseNum}">
+        <select id="libtype-${phase.phaseNum}">
+          <option value="task">Task</option>
+          <option value="deliverable">Deliverable</option>
+        </select>
+        <button class="btn btn-ghost btn-sm" onclick="addLibraryItem(${phase.phaseNum})">Add</button>
+      </div>
+    </div>`).join('');
+}
+async function addLibraryItem(phaseNum){
+  const input = document.getElementById(`libadd-${phaseNum}`);
+  const typeSel = document.getElementById(`libtype-${phaseNum}`);
+  const text = input.value.trim();
+  if(!text) return;
+  const phase = state.library.find(p=>p.phaseNum===phaseNum);
+  phase.items.push({id: uid('lib'), text, type: typeSel.value});
+  await saveLibrary();
+  input.value='';
+  renderLibraryModal();
+  toast('Added to template — applies to new accounts');
+}
+async function removeLibraryItem(phaseNum, itemId){
+  const phase = state.library.find(p=>p.phaseNum===phaseNum);
+  phase.items = phase.items.filter(i=>i.id!==itemId);
+  await saveLibrary();
+  renderLibraryModal();
+}
+
+/* ============================================================
+   DASHBOARD TAB
+   ============================================================ */
+async function renderDashboard(){
+  await Promise.all(state.accounts.map(a=>getChecklist(a.id)));
+  refreshDashboardStatsOnly();
+}
+
+function refreshDashboardStatsOnly(){
+  const rows = state.accounts.map(a=>{
+    const checklist = state.checklistCache[a.id] || {items:[]};
+    const stats = computeStats(checklist.items);
+    return {account:a, stats};
+  });
+
+  const total = rows.length;
+  const avg = total ? Math.round(rows.reduce((s,r)=>s+r.stats.percent,0)/total) : 0;
+  const readyRows = rows.filter(r=> r.stats.percent===100 && !r.account.endorsedAt);
+  const endorsedCount = rows.filter(r=> r.account.endorsedAt).length;
+
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statAvg').textContent = avg + '%';
+  document.getElementById('statReady').textContent = readyRows.length;
+  document.getElementById('statEndorsed').textContent = endorsedCount;
+
+  const alertsSection = document.getElementById('alertsSection');
+  if(readyRows.length){
+    alertsSection.style.display = 'block';
+    document.getElementById('alertCards').innerHTML = readyRows.map(r=>`
+      <div class="alert-card">
+        <div class="alert-card-name">${esc(r.account.name)}</div>
+        <div class="alert-card-owner">${esc(r.account.owner || 'Unassigned')} · 100% complete</div>
+        <button class="btn btn-gold btn-sm" onclick="endorseAccount('${r.account.id}')">Endorse to Clinic Success</button>
+      </div>`).join('');
+  } else {
+    alertsSection.style.display = 'none';
+  }
+
+  document.getElementById('dashTableBody').innerHTML = rows.length ? rows.map(r=>{
+    const {account, stats} = r;
+    const statusBadge = account.endorsedAt
+      ? '<span class="badge badge-endorsed">Endorsed</span>'
+      : stats.percent === 100 ? '<span class="badge badge-ready">Ready</span>' : '<span class="badge badge-progress">In progress</span>';
+    const doneSegs = Math.round((stats.percent/100)*11);
+    const stepper = Array.from({length:11}).map((_,i)=>`<div class="mini-seg ${i<doneSegs?'done':''}"></div>`).join('');
+    return `
+      <tr style="cursor:pointer;" onclick="jumpToAccount('${account.id}')">
+        <td><strong>${esc(account.name)}</strong></td>
+        <td>${esc(account.owner || '—')}</td>
+        <td><div class="mini-stepper">${stepper}</div></td>
+        <td class="mono">${stats.completed}/${stats.total}</td>
+        <td class="mono">${stats.percent}%</td>
+        <td>${statusBadge}</td>
+        <td>${new Date(account.createdAt).toLocaleDateString()}</td>
+        <td><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); jumpToAccount('${account.id}')">View</button></td>
+      </tr>`;
+  }).join('') : `<tr><td colspan="8" style="text-align:center; color:var(--muted); padding:30px;">No accounts yet — add one from the Checklist tab.</td></tr>`;
+
+  updateBell();
+}
+
+/* ============================================================
+   EXCEL EXPORT
+   ============================================================ */
+async function exportToExcel(){
+  if(typeof XLSX === 'undefined'){
+    toast('Excel library failed to load — check your internet connection and try again.', 'warn');
+    return;
+  }
+  if(!state.accounts.length){
+    toast('No accounts to export yet.', 'warn');
+    return;
+  }
+
+  await Promise.all(state.accounts.map(a=>getChecklist(a.id)));
+
+  // ---- Dashboard summary sheet ----
+  const dashRows = state.accounts.map(a=>{
+    const checklist = state.checklistCache[a.id] || {items:[]};
+    const stats = computeStats(checklist.items);
+    return {
+      'Clinic': a.name,
+      'Owner': a.owner || 'Unassigned',
+      'Completed Items': stats.completed,
+      'Total Items': stats.total,
+      '% Complete': stats.percent,
+      'Status': a.endorsedAt ? 'Endorsed' : (stats.percent === 100 ? 'Ready to endorse' : 'In progress'),
+      'Created': new Date(a.createdAt).toLocaleDateString(),
+      'Endorsed On': a.endorsedAt ? new Date(a.endorsedAt).toLocaleDateString() : '',
+    };
+  });
+  const totalAccounts = dashRows.length;
+  const avgPct = totalAccounts ? Math.round(dashRows.reduce((s,r)=>s+r['% Complete'],0)/totalAccounts) : 0;
+  const readyCount = dashRows.filter(r=>r['Status']==='Ready to endorse').length;
+  const endorsedCount = dashRows.filter(r=>r['Status']==='Endorsed').length;
+  dashRows.push({}); // spacer row
+  dashRows.push({'Clinic':'Total accounts', 'Owner': totalAccounts});
+  dashRows.push({'Clinic':'Average completion', 'Owner': avgPct + '%'});
+  dashRows.push({'Clinic':'Ready to endorse', 'Owner': readyCount});
+  dashRows.push({'Clinic':'Endorsed to CS', 'Owner': endorsedCount});
+
+  // ---- Checklist detail sheet ----
+  const checklistRows = [];
+  state.accounts.forEach(a=>{
+    const checklist = state.checklistCache[a.id] || {items:[]};
+    checklist.items.forEach(it=>{
+      checklistRows.push({
+        'Clinic': a.name,
+        'Owner': a.owner || 'Unassigned',
+        'Phase': it.phaseNum != null ? `Phase ${it.phaseNum}` : 'Custom',
+        'Phase Title': it.phaseTitle || '',
+        'Item Type': it.type === 'deliverable' ? 'Deliverable' : 'Task',
+        'Item': it.text,
+        'Completed': it.completed ? 'Yes' : 'No',
+        'Completed On': it.completedAt ? new Date(it.completedAt).toLocaleDateString() : '',
+      });
+    });
+  });
+
+  const wb = XLSX.utils.book_new();
+  const dashSheet = XLSX.utils.json_to_sheet(dashRows);
+  dashSheet['!cols'] = [{wch:26},{wch:18},{wch:15},{wch:12},{wch:12},{wch:16},{wch:12},{wch:12}];
+  XLSX.utils.book_append_sheet(wb, dashSheet, 'Dashboard');
+
+  const listSheet = XLSX.utils.json_to_sheet(checklistRows);
+  listSheet['!cols'] = [{wch:26},{wch:16},{wch:10},{wch:32},{wch:12},{wch:50},{wch:11},{wch:13}];
+  XLSX.utils.book_append_sheet(wb, listSheet, 'Checklist');
+
+  const datestamp = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `B2B_Sales_Onboarding_${datestamp}.xlsx`);
+  toast('Excel file downloaded ✓', 'success');
+}
+
+function jumpToAccount(accountId){
+  switchTab('checklist');
+  selectAccount(accountId);
+}
+
+/* ============================================================
+   ALERTS BELL
+   ============================================================ */
+function updateBell(){
+  const readyAccounts = state.accounts.filter(a=>{
+    const checklist = state.checklistCache[a.id];
+    if(!checklist) return false;
+    const stats = computeStats(checklist.items);
+    return stats.percent === 100 && !a.endorsedAt;
+  });
+  const badge = document.getElementById('bellBadge');
+  if(readyAccounts.length){
+    badge.style.display='flex';
+    badge.textContent = readyAccounts.length;
+  } else {
+    badge.style.display='none';
+  }
+  document.getElementById('bellList').innerHTML = readyAccounts.length
+    ? readyAccounts.map(a=>`
+      <div class="bell-item">
+        <div><div class="bell-item-name">${esc(a.name)}</div><div class="bell-item-owner">${esc(a.owner||'Unassigned')}</div></div>
+        <button class="btn btn-gold btn-sm" onclick="endorseAccount('${a.id}')">Endorse</button>
+      </div>`).join('')
+    : `<div class="bell-empty">No pending endorsements right now.</div>`;
+}
+document.getElementById('bellBtn').addEventListener('click', (e)=>{
+  e.stopPropagation();
+  document.getElementById('bellPanel').classList.toggle('open');
+});
+document.addEventListener('click', (e)=>{
+  const panel = document.getElementById('bellPanel');
+  if(!panel.contains(e.target) && e.target.id !== 'bellBtn'){ panel.classList.remove('open'); }
+});
+
+/* ============================================================
+   TAB SWITCHING
+   ============================================================ */
+function switchTab(tab){
+  state.activeTab = tab;
+  document.querySelectorAll('.nav-tab').forEach(b=> b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=> p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  if(tab==='dashboard') renderDashboard();
+}
+document.querySelectorAll('.nav-tab').forEach(btn=>{
+  btn.addEventListener('click', ()=> switchTab(btn.dataset.tab));
+});
+
+/* ============================================================
+   GO
+   ============================================================ */
+if(firebaseReady){
+  initApp();
+} else {
+  document.getElementById('fbSetupGate').style.display = 'flex';
+  console.warn('Firebase is not configured yet — fill in firebaseConfig near the top of the <script> tag.');
+}
+</script>
+</body>
+</html>

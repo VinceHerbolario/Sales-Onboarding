@@ -1,0 +1,1948 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>B2B Sales Onboarding Manual | Regenesys</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@500;600;700;800&family=Lato:wght@400;700;900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  /* Regenesys brand (regenesys.ph) */
+  --purple:#4E00A6;
+  --purple-mid:#692FA2;
+  --purple-dark:#2A0A52;
+  --purple-pale:#F4EEFB;
+  --purple-line:#E3D6F3;
+  --pink:#D94A85;
+  --pink-pale:#FCEEF4;
+  --coral:#E86949;
+  --coral-pale:#FDF0EC;
+  --gradient-brand:linear-gradient(135deg,#E86949 0%,#D94A85 50%,#692FA2 100%);
+  --white:#FFFFFF;
+  --surface:#FAF9FC;
+  --ink:#1F1A2B;
+  --body:#333333;
+  --muted:#6E6878;
+  --border:#E7E2EE;
+  --success:#2E7D5B;
+  --success-bg:#E8F4EE;
+  --warning:#B4691F;
+  --warning-bg:#FDF3E3;
+  --danger:#C23B4A;
+  --danger-bg:#FCEBED;
+  --radius:10px;
+  --shadow:0 1px 2px rgba(42,10,82,.05), 0 8px 24px -14px rgba(42,10,82,.22);
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{background:var(--white); color:var(--body); font-family:'Lato',sans-serif; font-size:14.5px; line-height:1.55; -webkit-font-smoothing:antialiased;}
+h1,h2,h3,h4,h5{font-family:'Raleway',sans-serif; color:var(--ink); margin:0;}
+.mono{font-family:'JetBrains Mono',monospace;}
+button{font-family:inherit; cursor:pointer;}
+input,select,textarea{font-family:inherit; color:var(--ink);}
+
+/* ---------- Topbar (brand colours live here) ---------- */
+.topbar{
+  background:linear-gradient(115deg,var(--purple-dark) 0%,var(--purple) 58%,var(--purple-mid) 100%);
+  color:#fff; display:flex; align-items:center; justify-content:space-between; gap:16px;
+  padding:0 28px; min-height:64px; position:sticky; top:0; z-index:40; flex-wrap:wrap;
+}
+.topbar:after{content:""; position:absolute; left:0; right:0; bottom:0; height:3px; background:var(--gradient-brand);}
+.brand{display:flex; align-items:center; gap:12px; padding:10px 0;}
+.brand-mark{width:24px; height:24px; background:var(--gradient-brand); transform:rotate(45deg); border-radius:5px; flex-shrink:0; box-shadow:0 0 0 2px rgba(255,255,255,.25);}
+.brand-text{display:flex; flex-direction:column; line-height:1.2;}
+.brand-text b{font-family:'Raleway',sans-serif; font-size:16px; font-weight:700; letter-spacing:.01em;}
+.brand-text span{font-size:11px; color:#DCCBF2; letter-spacing:.14em; text-transform:uppercase; font-weight:700;}
+.nav-tabs{display:flex; gap:4px; background:rgba(255,255,255,.1); padding:4px; border-radius:9px; overflow-x:auto; max-width:100%;}
+.nav-tab{border:none; background:transparent; color:#E6DAF6; padding:8px 15px; border-radius:6px; font-size:13.5px; font-weight:700; white-space:nowrap; transition:.15s;}
+.nav-tab:hover{color:#fff; background:rgba(255,255,255,.08);}
+.nav-tab.active{background:#fff; color:var(--purple);}
+.top-actions{display:flex; align-items:center; gap:14px;}
+.bell-wrap{position:relative;}
+.bell-btn{background:rgba(255,255,255,.12); border:none; color:#fff; width:38px; height:38px; border-radius:9px; position:relative; display:flex; align-items:center; justify-content:center; font-size:17px;}
+.bell-btn:hover{background:rgba(255,255,255,.22);}
+.bell-badge{position:absolute; top:-4px; right:-4px; background:var(--coral); color:#fff; font-size:10.5px; font-weight:900; min-width:17px; height:17px; border-radius:9px; display:flex; align-items:center; justify-content:center; padding:0 4px; border:2px solid var(--purple);}
+.bell-panel{position:absolute; top:48px; right:0; width:340px; background:#fff; border-radius:var(--radius); box-shadow:var(--shadow); border:1px solid var(--border); color:var(--ink); display:none; overflow:hidden; z-index:50;}
+.bell-panel.open{display:block;}
+.bell-panel-head{padding:14px 16px; border-bottom:1px solid var(--border); font-weight:700; color:var(--purple); font-size:13.5px;}
+.bell-list{max-height:340px; overflow-y:auto;}
+.bell-item{padding:12px 16px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; gap:10px;}
+.bell-item:last-child{border-bottom:none;}
+.bell-item-name{font-weight:700; font-size:13px;}
+.bell-item-owner{font-size:11.5px; color:var(--muted);}
+.bell-empty{padding:24px 16px; text-align:center; color:var(--muted); font-size:13px;}
+
+.conn{display:flex; align-items:center; gap:7px; font-size:11.5px; font-weight:700; color:#fff; background:rgba(255,255,255,.12); padding:6px 11px; border-radius:20px; white-space:nowrap;}
+.conn i{width:8px; height:8px; border-radius:50%; background:#C9B8E6; display:inline-block;}
+.conn-live i{background:#5BE39B; box-shadow:0 0 0 3px rgba(91,227,155,.25);}
+.conn-local i{background:#F5B04C;}
+.conn-wait i{animation:pulse 1s infinite alternate;}
+@keyframes pulse{from{opacity:.35;} to{opacity:1;}}
+
+/* ---------- Layout ---------- */
+main{max-width:1200px; margin:0 auto; padding:32px 28px 80px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block; animation:fade .25s ease;}
+@keyframes fade{from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;}}
+.page-head{margin-bottom:24px;}
+.page-head h1{font-size:27px; font-weight:700; color:var(--purple-dark);}
+.page-head p{margin:6px 0 0; color:var(--muted); font-size:14px; max-width:720px;}
+.card{background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow);}
+
+/* ---------- Buttons ---------- */
+.btn{display:inline-flex; align-items:center; gap:6px; border-radius:8px; border:1px solid transparent; padding:9px 16px; font-size:13.5px; font-weight:700; transition:.15s; white-space:nowrap;}
+.btn-primary{background:var(--purple); color:#fff;}
+.btn-primary:hover{background:var(--purple-mid);}
+.btn-accent{background:var(--pink); color:#fff;}
+.btn-accent:hover{background:#c43a73;}
+.btn-ghost{background:#fff; border-color:var(--border); color:var(--purple);}
+.btn-ghost:hover{background:var(--purple-pale); border-color:var(--purple-line);}
+.btn-danger{background:var(--danger); color:#fff;}
+.btn-danger:hover{background:#a52f3d;}
+.btn-sm{padding:6px 11px; font-size:12.5px;}
+.btn:disabled{opacity:.45; cursor:not-allowed;}
+.icon-btn{background:transparent; border:none; color:var(--muted); font-size:14px; padding:4px 7px; border-radius:6px; line-height:1;}
+.icon-btn:hover{background:var(--purple-pale); color:var(--purple);}
+.icon-btn.danger:hover{background:var(--danger-bg); color:var(--danger);}
+
+/* ---------- Badges ---------- */
+.badge{display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:900; padding:3px 9px; border-radius:20px; letter-spacing:.02em; white-space:nowrap;}
+.badge-progress{background:var(--purple-pale); color:var(--purple);}
+.badge-ready{background:var(--warning-bg); color:var(--warning);}
+.badge-endorsed{background:var(--pink-pale); color:#A8326A;}
+.badge-complete{background:var(--success-bg); color:var(--success);}
+.pill{font-size:9.5px; font-weight:900; letter-spacing:.05em; padding:2px 7px; border-radius:5px; text-transform:uppercase; white-space:nowrap;}
+.pill-task{background:var(--purple-pale); color:var(--purple);}
+.pill-deliverable{background:var(--coral-pale); color:#B4482B;}
+.status-chip{display:inline-block; font-size:10.5px; font-weight:900; padding:2px 8px; border-radius:20px; letter-spacing:.03em; white-space:nowrap;}
+.st-filled{background:var(--success-bg); color:var(--success);}
+.st-w1{background:var(--purple-pale); color:var(--purple);}
+.st-w2{background:var(--pink-pale); color:#A8326A;}
+.st-w3{background:var(--coral-pale); color:#B4482B;}
+.st-tbc{background:var(--warning-bg); color:var(--warning);}
+
+/* ---------- GUIDE ---------- */
+.guide-section{margin-bottom:40px;}
+.guide-section h2{font-size:20px; font-weight:700; margin-bottom:12px; color:var(--purple-dark);}
+.guide-eyebrow{font-size:11px; font-weight:900; letter-spacing:.12em; color:var(--pink); text-transform:uppercase; margin-bottom:4px; display:block;}
+.lede{color:var(--body); font-size:14.5px; max-width:780px; margin:0;}
+.lede + .lede{margin-top:10px;}
+.guide-toc{display:flex; flex-wrap:wrap; gap:8px; margin:-6px 0 30px;}
+.guide-toc a{font-size:12.5px; font-weight:700; color:var(--purple); text-decoration:none; padding:6px 12px; border:1px solid var(--purple-line); border-radius:20px; background:#fff;}
+.guide-toc a:hover{background:var(--purple-pale);}
+
+/* team & targets */
+.kpi-row{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin:16px 0 14px;}
+@media (max-width:860px){.kpi-row{grid-template-columns:repeat(2,1fr);}}
+.kpi{border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:#fff; position:relative; overflow:hidden;}
+.kpi:before{content:""; position:absolute; left:0; top:0; bottom:0; width:4px; background:var(--gradient-brand);}
+.kpi-label{font-size:10.5px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
+.kpi-value{font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700; color:var(--purple); margin-top:4px;}
+.kpi-sub{font-size:11.5px; color:var(--muted); margin-top:2px;}
+.quota-build{border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:var(--surface); font-size:13px;}
+.quota-build table{width:100%; border-collapse:collapse;}
+.quota-build td{padding:5px 4px; border-bottom:1px dashed var(--border);}
+.quota-build tr:last-child td{border-bottom:none; font-weight:900; color:var(--purple); border-top:2px solid var(--purple-line);}
+.quota-build td.num{text-align:right; font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+.quota-build td.calc{color:var(--muted); font-size:12px;}
+
+.leader-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:12px; margin-top:16px;}
+.leader-card{border:1px solid var(--border); border-radius:10px; padding:14px 16px; background:#fff;}
+.leader-card h4{font-size:14px; color:var(--purple-dark);}
+.leader-card .meta{font-size:12.5px; color:var(--muted); margin-top:4px;}
+.leader-card .target{font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:700; color:var(--purple); margin-top:8px; display:block;}
+
+.territory-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-top:16px;}
+@media (max-width:1000px){.territory-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:560px){.territory-grid{grid-template-columns:1fr;}}
+.territory-card{border:1px solid var(--border); border-radius:10px; background:#fff; overflow:hidden;}
+.territory-head{padding:14px 16px 12px; border-bottom:1px solid var(--border); background:var(--surface);}
+.territory-head .t-name{font-family:'Raleway',sans-serif; font-weight:800; font-size:15.5px; color:var(--purple-dark);}
+.territory-head .t-am{font-size:12.5px; color:var(--body); margin-top:3px; display:flex; justify-content:space-between; gap:8px; align-items:center;}
+.territory-head .t-target{font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--purple); font-weight:700; margin-top:6px;}
+.ao-list{list-style:none; margin:0; padding:6px 16px 10px;}
+.ao-list li{display:flex; justify-content:space-between; align-items:center; gap:8px; padding:7px 0; border-bottom:1px solid var(--border); font-size:12.8px;}
+.ao-list li:last-child{border-bottom:none;}
+.ao-list .ao-name b{color:var(--ink);}
+.ao-list .ao-name span{color:var(--muted); font-size:11.5px; display:block;}
+
+.support-row{display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:12px;}
+@media (max-width:760px){.support-row{grid-template-columns:1fr;}}
+
+.wave-table{width:100%; border-collapse:collapse; font-size:13px; margin-top:14px;}
+.wave-table th{background:var(--purple); color:#fff; text-align:left; padding:10px 12px; font-size:11px; letter-spacing:.05em; text-transform:uppercase;}
+.wave-table td{padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:top;}
+.wave-table tr:nth-child(even) td{background:var(--surface);}
+.wave-table td.t{font-weight:900; color:var(--purple-dark); white-space:nowrap;}
+.wave-table tfoot td{font-weight:900; background:var(--purple-pale) !important; color:var(--purple-dark);}
+.wave-table .num{font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+.table-scroll{overflow-x:auto;}
+
+.roles-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(230px,1fr)); gap:12px; margin-top:14px;}
+.role-card{padding:16px; border:1px solid var(--border); border-radius:10px; background:#fff;}
+.role-card b{color:var(--purple-dark); font-size:13.8px; display:block; margin-bottom:6px; font-family:'Raleway',sans-serif;}
+.role-card p{margin:0; font-size:12.8px; color:var(--muted); line-height:1.55;}
+.role-target{display:inline-block; margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:11px; font-weight:700; color:var(--purple); background:var(--purple-pale); border:1px solid var(--purple-line); padding:3px 9px; border-radius:20px;}
+
+.phase-accordion{border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-top:14px;}
+.phase-row{border-bottom:1px solid var(--border);}
+.phase-row:last-child{border-bottom:none;}
+.phase-header{display:flex; align-items:center; justify-content:space-between; gap:12px; padding:13px 16px; cursor:pointer; background:#fff; transition:.15s;}
+.phase-header:hover{background:var(--purple-pale);}
+.phase-header-left{display:flex; align-items:center; gap:12px;}
+.phase-num{width:28px; height:28px; border-radius:8px; background:var(--purple); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; font-family:'JetBrains Mono',monospace; flex-shrink:0;}
+.phase-num.cond{background:var(--pink);}
+.phase-num.post{background:var(--coral);}
+.phase-header-title{font-weight:700; font-size:14px; color:var(--ink);}
+.phase-header-owner{font-size:11.8px; color:var(--muted); margin-top:1px;}
+.phase-window{font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--purple); background:var(--purple-pale); padding:3px 9px; border-radius:20px; white-space:nowrap; font-weight:700;}
+.chev{transition:.2s; color:var(--muted); font-size:11px;}
+.phase-row.open .chev{transform:rotate(90deg);}
+.phase-body{max-height:0; overflow:hidden; transition:max-height .25s ease; background:var(--surface);}
+.phase-row.open .phase-body{max-height:1200px;}
+.phase-body-inner{padding:4px 16px 18px 56px;}
+.phase-obj{font-size:13px; color:var(--ink); margin:8px 0 12px; font-style:italic;}
+.phase-cols{display:grid; grid-template-columns:1fr 1fr; gap:22px;}
+@media (max-width:720px){.phase-cols{grid-template-columns:1fr;} .phase-body-inner{padding-left:16px;}}
+.phase-col-label{font-size:10.5px; font-weight:900; letter-spacing:.08em; color:var(--pink); text-transform:uppercase; margin:6px 0 6px;}
+.phase-list{margin:0; padding:0; list-style:none;}
+.phase-list li{font-size:13px; padding:3px 0 3px 14px; position:relative; color:var(--ink);}
+.phase-list li:before{content:"–"; position:absolute; left:0; color:var(--pink);}
+.phase-comp{font-size:12.5px; color:var(--purple-dark); background:var(--purple-pale); padding:9px 11px; border-radius:7px; margin-top:12px;}
+
+.tier-grid{display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-top:14px;}
+@media (max-width:900px){.tier-grid{grid-template-columns:1fr;}}
+.tier-card{border-radius:10px; padding:18px; border:1px solid var(--border); background:#fff; position:relative; overflow:hidden;}
+.tier-card:before{content:""; position:absolute; top:0; left:0; right:0; height:4px;}
+.tier-1:before{background:var(--purple);}
+.tier-2:before{background:var(--pink);}
+.tier-3:before{background:var(--coral);}
+.tier-badge{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; padding:3px 10px; border-radius:20px; margin-bottom:10px;}
+.tier-1 .tier-badge{background:var(--purple-pale); color:var(--purple);}
+.tier-2 .tier-badge{background:var(--pink-pale); color:#A8326A;}
+.tier-3 .tier-badge{background:var(--coral-pale); color:#B4482B;}
+.tier-card h4{color:var(--purple-dark); font-size:15.5px; margin:0 0 4px;}
+.tier-range{font-family:'JetBrains Mono',monospace; font-size:13px; font-weight:700; color:var(--purple); margin-bottom:10px; display:block;}
+.tier-card p{margin:0; font-size:12.8px; color:var(--muted); line-height:1.55;}
+
+.crit-grid{display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:14px;}
+@media (max-width:720px){.crit-grid{grid-template-columns:1fr;}}
+.crit-card{border-radius:10px; padding:16px 18px;}
+.crit-yes{background:var(--pink-pale); border:1px solid #F3CFDF;}
+.crit-no{background:var(--success-bg); border:1px solid #C7E1D0;}
+.crit-card h4{font-size:13.5px; margin-bottom:8px;}
+.crit-yes h4{color:#A8326A;}
+.crit-no h4{color:var(--success);}
+.crit-card ul{margin:0; padding-left:18px; font-size:12.8px; color:var(--ink);}
+.crit-card li{margin-bottom:6px;}
+
+.comp-table{width:100%; border-collapse:collapse; margin-top:14px; font-size:13px;}
+.comp-table th{background:var(--purple); color:#fff; text-align:left; padding:10px 14px; font-size:11px; letter-spacing:.05em; text-transform:uppercase;}
+.comp-table td{padding:12px 14px; border-bottom:1px solid var(--border); vertical-align:top;}
+.comp-table tr:nth-child(even) td{background:var(--surface);}
+.comp-role{font-weight:900; color:var(--purple-dark); white-space:nowrap;}
+.handover-list{max-width:700px; margin-top:12px;}
+.handover-list li{display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-bottom:1px solid var(--border); font-size:13.3px;}
+.handover-list li:last-child{border-bottom:none;}
+.handover-list .hc-num{flex-shrink:0; width:22px; height:22px; border-radius:50%; background:var(--purple-pale); color:var(--purple); font-size:11px; font-weight:900; display:flex; align-items:center; justify-content:center;}
+
+/* ---------- FLOWCHART ---------- */
+.flow-wrap{background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:12px; overflow-x:auto;}
+.flow-wrap svg{display:block; min-width:720px; width:100%; max-width:920px; height:auto; margin:0 auto;}
+.flow-note{font-size:12.8px; color:var(--muted); margin-top:14px; line-height:1.6; max-width:860px;}
+
+/* ---------- GANTT ---------- */
+.gantt-meta{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:16px;}
+.chip{font-family:'JetBrains Mono',monospace; font-size:11.5px; font-weight:700; padding:5px 12px; border-radius:20px; background:var(--purple-pale); color:var(--purple); border:1px solid var(--purple-line);}
+.gantt-tools{display:flex; gap:8px; margin-left:auto;}
+.gantt-wrap{background:#fff; border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px; overflow-x:auto;}
+.gantt-inner{min-width:1040px;}
+.g-grid{display:grid; grid-template-columns:340px 1fr;}
+.gantt-header-row{border-bottom:2px solid var(--purple); padding-bottom:6px; margin-bottom:2px;}
+.gantt-header-label{font-family:'JetBrains Mono',monospace; font-size:10.5px; font-weight:700; letter-spacing:.05em; color:var(--muted); text-transform:uppercase; align-self:end; padding-bottom:4px;}
+.gantt-ruler{position:relative; height:40px;}
+.gantt-ruler .wk{position:absolute; top:0; height:18px; font-size:10px; font-weight:900; color:var(--purple); text-align:center; letter-spacing:.04em; border-left:1px solid var(--purple-line); line-height:18px; background:var(--purple-pale);}
+.gantt-ruler .dy{position:absolute; top:22px; transform:translateX(-50%); font-family:'JetBrains Mono',monospace; font-size:9.5px; color:var(--muted); font-weight:600;}
+.track{position:relative;}
+.track-bg{position:absolute; inset:0; pointer-events:none;}
+.track-bg .wkband{position:absolute; top:0; bottom:0; border-left:1px solid var(--border);}
+.track-bg .wkband.alt{background:rgba(78,0,166,.025);}
+.g-row{border-bottom:1px solid var(--border);}
+.g-row:last-child{border-bottom:none;}
+.g-label{display:flex; align-items:flex-start; gap:9px; padding:11px 14px 11px 0; cursor:pointer; user-select:none;}
+.g-label:hover .g-title{color:var(--purple);}
+.g-chev{font-size:10px; color:var(--muted); margin-top:5px; transition:transform .15s; flex-shrink:0;}
+.g-row.open .g-chev{transform:rotate(90deg);}
+.g-phase{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; color:#fff; background:var(--purple); border-radius:10px; padding:1px 8px; margin-right:6px;}
+.g-phase.cond{background:var(--pink);}
+.g-phase.post{background:var(--coral);}
+.g-window{font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--purple); font-weight:700;}
+.g-title{display:block; font-size:13px; font-weight:700; color:var(--ink); line-height:1.3; margin-top:4px;}
+.g-owner{display:block; font-size:11px; color:var(--muted); margin-top:2px;}
+.g-track{min-height:58px;}
+.g-bar{position:absolute; top:50%; transform:translateY(-50%); height:26px; border-radius:6px; background:var(--purple); display:flex; align-items:center; padding:0 9px; box-shadow:0 1px 2px rgba(42,10,82,.25); overflow:hidden;}
+.g-bar span{color:#fff; font-size:11px; font-weight:700; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+.g-bar.cond{background:repeating-linear-gradient(135deg,var(--pink) 0 8px,#E5679B 8px 16px);}
+.g-bar.post{background:var(--coral); right:0; left:auto !important; border-radius:6px 0 0 6px;}
+.g-sub{display:none; background:var(--surface); border-top:1px dashed var(--border);}
+.g-row.open .g-sub{display:block;}
+.g-sub-head{grid-column:1/-1; font-family:'JetBrains Mono',monospace; font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--pink); padding:10px 0 4px 26px;}
+.g-task{border-top:1px solid #F0ECF5;}
+.g-task-label{padding:7px 14px 7px 26px; font-size:12.2px; color:var(--ink); line-height:1.4;}
+.g-task-label .eff{display:block; font-size:10.8px; color:var(--purple); font-weight:700; margin-top:2px;}
+.g-task-label .eff i{font-style:normal; color:var(--muted); font-weight:400;}
+.g-task .track{min-height:40px;}
+.g-tbar{position:absolute; top:50%; transform:translateY(-50%); height:14px; border-radius:4px; background:var(--purple-mid); opacity:.85;}
+.g-tbar.cond{background:var(--pink);}
+.g-dmark{position:absolute; top:50%; width:12px; height:12px; background:var(--coral); transform:translate(-50%,-50%) rotate(45deg); border-radius:2px;}
+.g-post-note{position:absolute; top:50%; right:8px; transform:translateY(-50%); font-size:11px; font-weight:700; color:#B4482B;}
+.gantt-legend{display:flex; gap:22px; flex-wrap:wrap; margin-top:14px; font-size:12.3px; color:var(--muted);}
+.lg-item{display:flex; align-items:center; gap:7px;}
+.lg-swatch{width:20px; height:12px; border-radius:3px; background:var(--purple); flex-shrink:0;}
+.lg-swatch.task{background:var(--purple-mid); height:8px;}
+.lg-swatch.cond{background:repeating-linear-gradient(135deg,var(--pink) 0 6px,#E5679B 6px 12px);}
+.lg-swatch.post{background:var(--coral);}
+.lg-diamond{width:10px; height:10px; background:var(--coral); transform:rotate(45deg); border-radius:2px; margin:0 5px;}
+
+/* ---------- CHECKLIST ---------- */
+.checklist-toolbar{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; flex-wrap:wrap;}
+.checklist-layout{display:grid; grid-template-columns:290px 1fr; gap:18px; align-items:start;}
+@media (max-width:900px){.checklist-layout{grid-template-columns:1fr;}}
+.acct-search{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:8px; font-size:13px; margin-bottom:10px;}
+.acct-search:focus,.field input:focus,.field select:focus,.item-date:focus,.item-init:focus{outline:2px solid var(--purple-line); border-color:var(--purple);}
+.acct-list{display:flex; flex-direction:column; gap:7px; max-height:640px; overflow-y:auto;}
+.acct-item{border:1px solid var(--border); border-radius:9px; padding:11px 12px; background:#fff; cursor:pointer; transition:.15s;}
+.acct-item:hover{border-color:var(--pink);}
+.acct-item.active{border-color:var(--purple); background:var(--purple-pale);}
+.acct-item-top{display:flex; justify-content:space-between; align-items:flex-start; gap:6px;}
+.acct-item-name{font-weight:900; font-size:13px; color:var(--ink);}
+.acct-item-owner{font-size:11.3px; color:var(--muted); margin-top:1px;}
+.acct-item-bar{height:5px; background:var(--border); border-radius:3px; margin-top:9px; overflow:hidden;}
+.acct-item-bar-fill{height:100%; background:var(--gradient-brand); border-radius:3px;}
+.acct-item-pct{font-size:10.8px; color:var(--muted); margin-top:5px; font-family:'JetBrains Mono',monospace;}
+.empty-state{padding:60px 20px; text-align:center; color:var(--muted);}
+.empty-state .em-icon{font-size:30px; margin-bottom:10px;}
+
+.detail-head{display:flex; justify-content:space-between; align-items:flex-start; gap:12px; padding:20px 24px; border-bottom:1px solid var(--border); flex-wrap:wrap;}
+.detail-title h2{font-size:20px; color:var(--purple-dark);}
+.detail-meta{font-size:12px; color:var(--muted); margin-top:4px;}
+.detail-actions{display:flex; gap:8px; align-items:center; flex-wrap:wrap;}
+.detail-progress-wrap{padding:16px 24px; border-bottom:1px solid var(--border);}
+.progress-big{height:10px; background:var(--border); border-radius:6px; overflow:hidden; margin:8px 0 6px;}
+.progress-big-fill{height:100%; background:var(--gradient-brand); border-radius:6px; transition:width .3s;}
+.progress-label{display:flex; justify-content:space-between; font-size:12px; color:var(--muted); gap:10px; flex-wrap:wrap;}
+.warn-line{font-size:12px; color:var(--warning); margin-top:6px; font-weight:700;}
+.banner{margin:16px 24px 0; padding:13px 16px; border-radius:9px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;}
+.banner-ready{background:var(--warning-bg); border:1px solid #EFD3A8;}
+.banner-ready strong{color:var(--warning); font-size:13.3px;}
+.banner-ready span{font-size:12px; color:#8A5214;}
+.banner-endorsed{background:var(--pink-pale); border:1px solid #F3CFDF; color:#A8326A; font-size:13px; font-weight:700;}
+.banner-complete{background:var(--success-bg); border:1px solid #C7E1D0; color:var(--success); font-size:13px; font-weight:700;}
+.checklist-body{padding:18px 24px 26px;}
+.col-head{display:grid; grid-template-columns:24px 1fr 150px 92px 30px; gap:10px; padding:0 18px 6px; font-size:10px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; color:var(--muted);}
+@media (max-width:700px){.col-head{display:none;}}
+.phase-block{border:1px solid var(--border); border-radius:9px; margin-bottom:10px; overflow:hidden;}
+.phase-block-head{display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 14px; background:#fff; cursor:pointer;}
+.phase-block-head:hover{background:var(--purple-pale);}
+.phase-block-count{font-size:11.5px; color:var(--muted); font-family:'JetBrains Mono',monospace; white-space:nowrap;}
+.phase-block-count.done{color:var(--success); font-weight:700;}
+.phase-block-body{display:none; padding:6px 14px 14px; background:var(--surface);}
+.phase-block.open .phase-block-body{display:block;}
+.phase-block.open .chev{transform:rotate(90deg);}
+.phase-block.na .phase-block-head strong{color:var(--muted);}
+.na-toggle{display:flex; align-items:center; gap:8px; padding:10px 12px; margin:6px 0 8px; background:var(--pink-pale); border:1px solid #F3CFDF; border-radius:8px; font-size:12.5px; color:#8E2A59; font-weight:700;}
+.na-toggle input{width:16px; height:16px; accent-color:var(--pink);}
+.item-row{display:grid; grid-template-columns:24px 1fr 150px 92px 30px; gap:10px; align-items:center; padding:7px 4px; border-radius:6px;}
+.item-row:hover{background:#F2EDF8;}
+.item-row.disabled{opacity:.45; pointer-events:none;}
+@media (max-width:700px){.item-row{grid-template-columns:24px 1fr 30px;} .item-row .item-date,.item-row .item-init{grid-column:2 / span 1;}}
+.item-row input[type=checkbox]{width:16px; height:16px; accent-color:var(--purple); cursor:pointer; margin:0;}
+.item-text{font-size:13px; line-height:1.45; color:var(--ink);}
+.item-text.done{color:var(--muted); text-decoration:line-through;}
+.item-text .pill{margin-left:4px; vertical-align:1px;}
+.item-date,.item-init{width:100%; padding:6px 8px; border:1px solid var(--border); border-radius:6px; font-size:12px; background:#fff;}
+.item-init{text-transform:uppercase; font-family:'JetBrains Mono',monospace; letter-spacing:.06em;}
+.item-init.missing{border-color:#E9B66F; background:var(--warning-bg);}
+.item-remove{opacity:.35; transition:.15s;}
+.item-row:hover .item-remove{opacity:1;}
+.add-item-row{display:flex; gap:6px; margin-top:8px; padding-top:8px; border-top:1px dashed var(--border); flex-wrap:wrap;}
+.add-item-row input[type=text]{flex:1; min-width:180px; padding:7px 9px; border:1px solid var(--border); border-radius:6px; font-size:12.5px;}
+.add-item-row select{padding:7px 8px; border:1px solid var(--border); border-radius:6px; font-size:12.3px;}
+
+/* ---------- DASHBOARD ---------- */
+.stat-grid{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+@media (max-width:800px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{padding:18px 20px; position:relative; overflow:hidden;}
+.stat-card:before{content:""; position:absolute; left:0; right:0; top:0; height:3px; background:var(--gradient-brand);}
+.stat-label{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; font-weight:900;}
+.stat-value{font-family:'JetBrains Mono',monospace; font-size:28px; font-weight:700; color:var(--purple); margin-top:6px;}
+.stat-sub{font-size:11.5px; color:var(--muted); margin-top:3px;}
+.alerts-section{margin-bottom:22px;}
+.alert-cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:12px; margin-top:12px;}
+.alert-card{border:1px solid #EFD3A8; background:var(--warning-bg); border-radius:9px; padding:14px 16px; display:flex; flex-direction:column; gap:8px;}
+.alert-card-name{font-weight:900; font-size:13.5px; color:#7A4610;}
+.alert-card-owner{font-size:11.5px; color:#8A5214;}
+table.acct-table{width:100%; border-collapse:collapse; font-size:12.8px;}
+table.acct-table th{text-align:left; padding:10px 12px; background:var(--purple); color:#fff; font-size:10.8px; letter-spacing:.05em; text-transform:uppercase; white-space:nowrap;}
+table.acct-table td{padding:11px 12px; border-bottom:1px solid var(--border); vertical-align:middle;}
+table.acct-table tr:hover td{background:var(--surface);}
+.mini-stepper{display:flex; gap:2px; width:132px;}
+.mini-seg{flex:1; height:7px; border-radius:2px; background:var(--border);}
+.mini-seg.done{background:var(--purple);}
+.mini-seg.na{background:repeating-linear-gradient(135deg,#E7E2EE 0 3px,#fff 3px 6px);}
+
+/* ---------- Modal ---------- */
+.modal-overlay{position:fixed; inset:0; background:rgba(31,26,43,.5); display:none; align-items:center; justify-content:center; z-index:100; padding:20px;}
+.modal-overlay.open{display:flex;}
+.modal{background:#fff; border-radius:12px; width:100%; max-width:440px; box-shadow:var(--shadow); overflow:hidden;}
+.modal-head{padding:18px 22px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; border-top:4px solid var(--purple);}
+.modal-head h3{font-size:16px; color:var(--purple-dark);}
+.modal-body{padding:20px 22px;}
+.modal-foot{padding:16px 22px; border-top:1px solid var(--border); display:flex; justify-content:flex-end; gap:8px;}
+.field{margin-bottom:14px;}
+.field label{display:block; font-size:12px; font-weight:900; color:var(--purple-dark); margin-bottom:5px;}
+.field input,.field select{width:100%; padding:9px 11px; border:1px solid var(--border); border-radius:7px; font-size:13px;}
+.pw-error{color:var(--danger); font-size:12.5px; font-weight:700; min-height:18px; margin-top:4px;}
+.pw-desc{font-size:13px; color:var(--body); margin:0 0 14px;}
+.lib-phase{border:1px solid var(--border); border-radius:8px; margin-bottom:10px; padding:12px 14px;}
+.lib-phase h4{font-size:13px; color:var(--purple-dark); margin-bottom:8px;}
+.lib-item-row{display:flex; align-items:center; gap:8px; padding:4px 0; font-size:12.5px;}
+.lib-item-row span.txt{flex:1;}
+
+#toast-container{position:fixed; bottom:22px; right:22px; display:flex; flex-direction:column; gap:8px; z-index:200;}
+.toast{background:var(--purple); color:#fff; padding:12px 18px; border-radius:9px; font-size:13px; box-shadow:var(--shadow); min-width:240px; max-width:360px; animation:toastIn .2s ease;}
+.toast.success{background:var(--success);}
+.toast.warn{background:var(--warning);}
+.toast.error{background:var(--danger);}
+@keyframes toastIn{from{opacity:0; transform:translateY(8px);} to{opacity:1; transform:none;}}
+::-webkit-scrollbar{width:9px; height:9px;}
+::-webkit-scrollbar-thumb{background:#D9CFE6; border-radius:5px;}
+.btn-xs{padding:4px 9px; font-size:11.5px; border-radius:6px;}
+.phase-head-right{display:flex; align-items:center; gap:10px;}
+.acct-details{display:grid; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); gap:8px 18px; margin-top:12px; padding:12px 14px; background:var(--surface); border:1px solid var(--border); border-radius:8px;}
+.acct-details div{font-size:12.8px; color:var(--ink); min-width:0; overflow-wrap:anywhere;}
+.acct-details span{display:block; font-size:10px; font-weight:900; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:1px;}
+.acct-details .empty{color:var(--muted); font-style:italic;}
+.field-row{display:grid; grid-template-columns:1fr 1fr; gap:12px;}
+@media (max-width:520px){.field-row{grid-template-columns:1fr;}}
+.field-section{font-size:10.5px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--pink); margin:4px 0 10px; padding-top:10px; border-top:1px dashed var(--border);}
+
+/* ---------- Print (handover checklist) ---------- */
+#printArea{display:none;}
+@media print{
+  body > *:not(#printArea){display:none !important;}
+  body{background:#fff;}
+  #printArea{display:block; font-family:'Lato',Arial,sans-serif; color:#1F1A2B; font-size:10.5px;}
+  @page{size:A4 landscape; margin:11mm;}
+}
+#printArea *{-webkit-print-color-adjust:exact; print-color-adjust:exact;}
+#printArea .p-head{display:flex; justify-content:space-between; align-items:flex-end; border-bottom:3px solid #4E00A6; padding-bottom:8px; margin-bottom:10px;}
+#printArea .p-brand{font-size:10px; font-weight:900; letter-spacing:.16em; color:#D94A85;}
+#printArea h1{font-family:'Raleway',Arial,sans-serif; font-size:18px; color:#2A0A52; margin:2px 0 0;}
+#printArea .p-sub{font-size:10px; color:#6E6878; text-align:right;}
+#printArea table{width:100%; border-collapse:collapse; margin-bottom:12px;}
+#printArea th{background:#4E00A6; color:#fff; text-align:left; padding:5px 7px; font-size:9.5px; text-transform:uppercase; letter-spacing:.04em;}
+#printArea td{border:1px solid #DDD6E8; padding:5px 7px; vertical-align:top;}
+#printArea .kv td:nth-child(odd){background:#F4EEFB; font-weight:700; width:15%; color:#2A0A52;}
+#printArea .kv td:nth-child(even){width:35%;}
+#printArea tr.phase-row td{background:#F4EEFB; font-weight:900; color:#2A0A52;}
+#printArea tr{page-break-inside:avoid;}
+#printArea .st-done{color:#2E7D5B; font-weight:700;}
+#printArea .st-pending{color:#B4691F; font-weight:700;}
+#printArea .st-na{color:#6E6878;}
+#printArea .sign{display:grid; grid-template-columns:repeat(3,1fr); gap:24px; margin-top:22px;}
+#printArea .sign div{border-top:1px solid #1F1A2B; padding-top:4px; font-size:10px;}
+#printArea .sign b{display:block; font-size:10.5px;}
+
+@media (max-width:640px){
+  .topbar{padding:0 14px;} main{padding:22px 16px 60px;}
+  .detail-head,.detail-progress-wrap,.checklist-body{padding-left:14px; padding-right:14px;}
+  .banner{margin-left:14px; margin-right:14px;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <div class="brand-mark"></div>
+    <div class="brand-text">
+      <span>Regenesys</span>
+      <b>B2B Sales Onboarding Manual</b>
+    </div>
+  </div>
+  <nav class="nav-tabs">
+    <button class="nav-tab active" data-tab="guide">Guide</button>
+    <button class="nav-tab" data-tab="flowchart">Flowchart</button>
+    <button class="nav-tab" data-tab="gantt">Gantt Chart</button>
+    <button class="nav-tab" data-tab="checklist">Checklist</button>
+    <button class="nav-tab" data-tab="dashboard">Dashboard</button>
+  </nav>
+  <div class="top-actions">
+    <div class="conn conn-wait" id="connStatus" title="Connecting to the shared database"><i></i><span>Connecting…</span></div>
+    <div class="bell-wrap">
+      <button class="bell-btn" id="bellBtn" title="Ready to endorse to Clinic Success">&#128276;<span class="bell-badge" id="bellBadge" style="display:none;">0</span></button>
+      <div class="bell-panel" id="bellPanel">
+        <div class="bell-panel-head">Ready to endorse to Clinic Success</div>
+        <div class="bell-list" id="bellList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+<!-- ===================== GUIDE ===================== -->
+<section class="tab-panel active" id="tab-guide">
+  <div class="page-head">
+    <h1>B2B Sales Onboarding Manual</h1>
+    <p>Clinic Partner Onboarding Framework — from first contact to Clinic Success handover. Read the guide, then track live accounts in the Checklist tab.</p>
+  </div>
+  <div class="guide-toc">
+    <a href="#g-purpose">Purpose</a><a href="#g-team">Team &amp; targets</a><a href="#g-priority">Priority areas</a><a href="#g-roles">Roles</a><a href="#g-tiers">Qualification matrix</a><a href="#g-phases">Phases</a><a href="#g-medical">Medical decision</a><a href="#g-comp">Competencies</a><a href="#g-handover">Handover criteria</a>
+  </div>
+
+  <div class="guide-section" id="g-purpose">
+    <span class="guide-eyebrow">Purpose</span>
+    <h2>Why this framework exists</h2>
+    <p class="lede">Every Account Officer and Account Manager must be able to run the full sales presentation and qualify a clinic without medical support in most cases. The Medical Team is a conditional resource, engaged only when a clinic's clinical questions genuinely exceed the account owner's knowledge — never a default step in the funnel.</p>
+    <p class="lede">This guide covers all 11 phases, from prospecting to the full Clinic Success handover at month 6. Phases 1–10 run inside the standard 45-day sales cycle. Account Officers and Account Managers follow the same funnel; Account Managers also lead their territory team and carry its combined target.</p>
+  </div>
+
+  <div class="guide-section" id="g-team">
+    <span class="guide-eyebrow">Team &amp; targets</span>
+    <h2>Team roster — B2B | RVI wholesale</h2>
+    <p class="lede">Led by the BD Director. Read each territory from the Account Manager down — Account Officers report to their territory's Account Manager.</p>
+    <div class="kpi-row" id="kpiRow"></div>
+    <div class="quota-build" id="quotaBuild"></div>
+    <div class="leader-grid" id="leaderGrid"></div>
+    <div class="territory-grid" id="territoryGrid"></div>
+    <h3 style="font-size:15px; margin:22px 0 2px; color:var(--purple-dark);">Supporting functions — under the Chief Operating Officer</h3>
+    <p class="lede" style="font-size:13px; color:var(--muted);">Clinic success and sales enablement.</p>
+    <div class="support-row" id="supportRow"></div>
+  </div>
+
+  <div class="guide-section" id="g-priority">
+    <span class="guide-eyebrow">Priority areas</span>
+    <h2>Territory coverage and hiring waves</h2>
+    <p class="lede">Priority follows the hiring waves: filled seats carry quota now, and each wave switches on more Account Officer quota at ₱3.5M per seat.</p>
+    <div class="table-scroll"><table class="wave-table" id="waveTable"></table></div>
+  </div>
+
+  <div class="guide-section" id="g-roles">
+    <span class="guide-eyebrow">Roles</span>
+    <h2>Ownership overview</h2>
+    <div class="roles-grid" id="rolesGrid"></div>
+  </div>
+
+  <div class="guide-section" id="g-tiers">
+    <span class="guide-eyebrow">Lead qualification</span>
+    <h2>Clinic qualification matrix</h2>
+    <p class="lede">Complete this matrix in Phase 2 and log it in GHL. It scores how much monthly revenue a lead can realistically generate, so you can prioritize accordingly.</p>
+    <div class="tier-grid" id="tierGrid"></div>
+  </div>
+
+  <div class="guide-section" id="g-phases">
+    <span class="guide-eyebrow">Process</span>
+    <h2>Phase-by-phase framework</h2>
+    <p class="lede">Click a phase to see its objective, tasks, deliverables and core competency. Day windows match the Gantt chart.</p>
+    <div class="phase-accordion" id="guidePhaseAccordion"></div>
+  </div>
+
+  <div class="guide-section" id="g-medical">
+    <span class="guide-eyebrow">Decision point · Phase 3</span>
+    <h2>Is a Medical Discussion needed?</h2>
+    <p class="lede">Default to <b>No</b>. Escalate to the Medical Team only when one of the criteria on the left is clearly met.</p>
+    <div class="crit-grid">
+      <div class="crit-card crit-yes"><h4>Escalate to Medical when —</h4><ul id="critYes"></ul></div>
+      <div class="crit-card crit-no"><h4>Proceed without Medical when —</h4><ul id="critNo"></ul></div>
+    </div>
+  </div>
+
+  <div class="guide-section" id="g-comp">
+    <span class="guide-eyebrow">Capability</span>
+    <h2>Sales team competency framework</h2>
+    <div class="table-scroll"><table class="comp-table" id="compTable"><thead><tr><th>Role</th><th>Required competencies</th></tr></thead><tbody></tbody></table></div>
+  </div>
+
+  <div class="guide-section" id="g-handover">
+    <span class="guide-eyebrow">Definition of done</span>
+    <h2>Handover criteria to Clinic Success</h2>
+    <p class="lede">A clinic is ready to endorse only when every item below is true. The Checklist tab flags it automatically once Phases 1–9 are complete.</p>
+    <ul class="handover-list" id="handoverCriteriaList" style="list-style:none; padding:0;"></ul>
+  </div>
+</section>
+
+<!-- ===================== FLOWCHART ===================== -->
+<section class="tab-panel" id="tab-flowchart">
+  <div class="page-head">
+    <h1>Sales Onboarding Process Flow</h1>
+    <p>The full clinic journey in one view — read top to bottom. Purple boxes are the steps, lilac diamonds are the decisions, and every "not yet" loops back instead of dropping the lead.</p>
+  </div>
+  <div class="flow-wrap">
+<svg viewBox="0 0 900 2010" xmlns="http://www.w3.org/2000/svg" font-family="Lato, sans-serif" role="img" aria-label="B2B sales onboarding process flow">
+<defs>
+  <marker id="aPurple" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#4E00A6"/></marker>
+  <marker id="aGreen" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#2E7D5B"/></marker>
+  <marker id="aCoral" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#E86949"/></marker>
+  <marker id="aPink" markerUnits="userSpaceOnUse" markerWidth="11" markerHeight="11" refX="9" refY="5.5" orient="auto"><path d="M0,0 L11,5.5 L0,11 Z" fill="#D94A85"/></marker>
+  <linearGradient id="gBrand" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#2A0A52"/><stop offset="1" stop-color="#692FA2"/></linearGradient>
+</defs>
+<g id="flowContent"></g>
+</svg>
+  </div>
+  <p class="flow-note"><b style="color:#2E7D5B;">Green arrows</b> mean the clinic clears the step and moves on. <b style="color:#E86949;">Coral dashed arrows</b> mean "not yet" — the account owner follows the action written under the arrow, logs the outcome in GHL, and loops back. The <b style="color:#D94A85;">pink branch</b> is the conditional Medical Discussion (Phase 4); the account owner attends and keeps ownership of the relationship.</p>
+</section>
+
+<!-- ===================== GANTT ===================== -->
+<section class="tab-panel" id="tab-gantt">
+  <div class="page-head">
+    <h1>45-Day Onboarding Gantt Chart</h1>
+    <p>Target timeline for every phase, task and deliverable inside the standard 45-day sales cycle. Each task shows its expected effort so short tasks stay short. Click a phase to see its task bars and deliverable due dates.</p>
+  </div>
+  <div class="gantt-meta">
+    <span class="chip">Sales cycle: 45 days</span>
+    <span class="chip">Phases 1–10 in cycle · Phase 11 at month 6</span>
+    <span class="chip" id="ganttItemCount">—</span>
+    <div class="gantt-tools">
+      <button class="btn btn-ghost btn-sm" id="ganttExpandAll">Expand all</button>
+      <button class="btn btn-ghost btn-sm" id="ganttCollapseAll">Collapse all</button>
+    </div>
+  </div>
+  <div class="gantt-wrap">
+    <div class="gantt-inner">
+      <div class="g-grid gantt-header-row">
+        <div class="gantt-header-label">Phase · window · owner</div>
+        <div class="gantt-ruler" id="ganttRuler"></div>
+      </div>
+      <div id="ganttBody"></div>
+    </div>
+  </div>
+  <div class="gantt-legend">
+    <div class="lg-item"><span class="lg-swatch"></span> Phase window</div>
+    <div class="lg-item"><span class="lg-swatch task"></span> Task window</div>
+    <div class="lg-item"><span class="lg-diamond"></span> Deliverable due</div>
+    <div class="lg-item"><span class="lg-swatch cond"></span> Conditional (only if a Medical Discussion is needed)</div>
+    <div class="lg-item"><span class="lg-swatch post"></span> Post-cycle milestone</div>
+  </div>
+  <p class="flow-note">Days are target windows counted from first contact (Day 1), not calendar dates. Phase 4 runs in parallel with MOU drafting when triggered, so it does not extend the cycle. Phase 6 follow-ups are timed from the day the MOU is sent (Day 17): +3, +5, +7 and +15 days land on Days 20, 22, 24 and 32. Clinic Success handover meetings happen on Mondays — use the first Monday on or after Day 44.</p>
+</section>
+
+<!-- ===================== CHECKLIST ===================== -->
+<section class="tab-panel" id="tab-checklist">
+  <div class="page-head">
+    <h1>Account Checklist</h1>
+    <p>Track every task and deliverable per clinic partner. Log the completion date and the confirming supervisor's initials for each item, then copy the record into the CRM.</p>
+  </div>
+  <div class="checklist-toolbar">
+    <button class="btn btn-ghost btn-sm" id="openLibraryBtn">⚙ Manage checklist template</button>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <button class="btn btn-ghost btn-sm" id="exportExcelBtnChecklist">⬇ Download Excel</button>
+      <button class="btn btn-primary" id="newAccountBtn">+ New account</button>
+    </div>
+  </div>
+  <div class="checklist-layout">
+    <div class="card" style="padding:16px;">
+      <input type="text" class="acct-search" id="acctSearch" placeholder="Search accounts…">
+      <div class="acct-list" id="acctList"></div>
+    </div>
+    <div class="card" id="detailCard">
+      <div class="empty-state" id="detailEmpty"><div class="em-icon">📋</div><div>Select an account on the left, or create a new one to start its checklist.</div></div>
+      <div id="detailContent" style="display:none;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DASHBOARD ===================== -->
+<section class="tab-panel" id="tab-dashboard">
+  <div class="page-head" style="display:flex; justify-content:space-between; align-items:flex-end; gap:16px; flex-wrap:wrap;">
+    <div><h1>Portfolio Dashboard</h1><p>Live status across every clinic partner in the onboarding pipeline.</p></div>
+    <button class="btn btn-ghost btn-sm" id="exportExcelBtnDashboard">⬇ Download Excel</button>
+  </div>
+  <div class="stat-grid">
+    <div class="card stat-card"><div class="stat-label">Total accounts</div><div class="stat-value" id="statTotal">0</div><div class="stat-sub">in the pipeline</div></div>
+    <div class="card stat-card"><div class="stat-label">Avg. completion</div><div class="stat-value" id="statAvg">0%</div><div class="stat-sub">across all accounts</div></div>
+    <div class="card stat-card"><div class="stat-label">Ready to endorse</div><div class="stat-value" id="statReady">0</div><div class="stat-sub">Phases 1–9 done, not yet endorsed</div></div>
+    <div class="card stat-card"><div class="stat-label">Endorsed to CS</div><div class="stat-value" id="statEndorsed">0</div><div class="stat-sub">handed over to Clinic Success</div></div>
+  </div>
+  <div class="alerts-section" id="alertsSection" style="display:none;">
+    <h2 style="font-size:17px;">🔔 Ready to endorse</h2>
+    <div class="alert-cards" id="alertCards"></div>
+  </div>
+  <div class="card" style="overflow:auto;">
+    <table class="acct-table">
+      <thead><tr><th>Clinic</th><th>Territory</th><th>Specialty</th><th>Owner</th><th>CSM</th><th>Current phase</th><th>Phase progress</th><th>Done</th><th>%</th><th>Awaiting initials</th><th>Status</th><th>Created</th><th></th></tr></thead>
+      <tbody id="dashTableBody"></tbody>
+    </table>
+  </div>
+</section>
+</main>
+
+<!-- Account modal (new + edit) -->
+<div class="modal-overlay" id="newAcctModal">
+  <div class="modal" style="max-width:560px;">
+    <div class="modal-head"><h3 id="acctModalTitle">New account</h3><button class="icon-btn" data-close-modal="newAcctModal">✕</button></div>
+    <div class="modal-body" style="max-height:68vh; overflow-y:auto;">
+      <div class="field"><label>Clinic / partner name</label><input type="text" id="newAcctName" placeholder="e.g. Riverstone Aesthetics Clinic"></div>
+      <div class="field-row">
+        <div class="field"><label>Account owner</label><input type="text" id="newAcctOwner" placeholder="e.g. Maria Santos"></div>
+        <div class="field"><label>Territory</label>
+          <select id="newAcctTerritory"><option value="">Select territory…</option><option>NCR</option><option>South Luzon</option><option>North Luzon</option><option>Visayas</option><option>Mindanao</option><option>Affiliate referral</option></select>
+        </div>
+      </div>
+      <div class="field-section">Clinic details</div>
+      <div class="field-row">
+        <div class="field"><label>No. of clinics / branches</label><input type="number" min="1" step="1" id="newAcctBranches" placeholder="e.g. 3"></div>
+        <div class="field"><label>Specialty / vertical</label><input type="text" id="newAcctSpecialty" list="specialtyList" placeholder="e.g. Aesthetics &amp; Dermatology"></div>
+      </div>
+      <div class="field"><label>Location of other clinics / branches</label><input type="text" id="newAcctBranchAreas" placeholder="e.g. BGC, Alabang, Cebu IT Park"></div>
+      <div class="field"><label>CSM assigned</label><input type="text" id="newAcctCsm" placeholder="Clinic Success Manager handling this account"></div>
+      <datalist id="specialtyList">
+        <option value="Aesthetics &amp; Dermatology"><option value="Orthopedics &amp; Sports Medicine"><option value="Regenerative &amp; Wellness"><option value="Pain Management"><option value="Plastic Surgery"><option value="Dental"><option value="Multi-specialty">
+      </datalist>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" data-close-modal="newAcctModal">Cancel</button><button class="btn btn-primary" id="createAcctBtn">Create account</button></div>
+  </div>
+</div>
+
+<!-- Template modal -->
+<div class="modal-overlay" id="libraryModal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-head"><h3>Manage checklist template</h3><button class="icon-btn" data-close-modal="libraryModal">✕</button></div>
+    <div class="modal-body" style="max-height:62vh; overflow-y:auto;">
+      <p style="font-size:12.5px; color:var(--muted); margin-top:0;">This template is applied to every <b>new</b> account. Existing accounts keep their own checklist — edit those from the account view. Removing items requires the delete password.</p>
+      <div id="libraryPhases"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost btn-sm" id="resetTemplateBtn" style="margin-right:auto;">Restore default template</button><button class="btn btn-primary" data-close-modal="libraryModal">Done</button></div>
+  </div>
+</div>
+
+<!-- Password modal -->
+<div class="modal-overlay" id="pwModal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-head"><h3>Password required</h3><button class="icon-btn" id="pwCancelX">✕</button></div>
+    <div class="modal-body">
+      <p class="pw-desc" id="pwDesc">Enter the password to delete.</p>
+      <div class="field" style="margin-bottom:0;"><label>Password</label><input type="password" id="pwInput" autocomplete="off"></div>
+      <div class="pw-error" id="pwError"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" id="pwCancel">Cancel</button><button class="btn btn-danger" id="pwConfirm">Confirm delete</button></div>
+  </div>
+</div>
+
+<div id="toast-container"></div>
+<div id="printArea"></div>
+
+<!-- ===================== FIREBASE (shared live database) ===================== -->
+<script type="module" onerror="window.__fbError='load'; window.dispatchEvent(new Event('fb-failed'));">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, doc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBV4Fny2AWkF8kAuEh_NHAEmvFVfW6v6BU",
+  authDomain: "sales-onboarding-manual-abd6f.firebaseapp.com",
+  projectId: "sales-onboarding-manual-abd6f",
+  storageBucket: "sales-onboarding-manual-abd6f.firebasestorage.app",
+  messagingSenderId: "655117965019",
+  appId: "1:655117965019:web:1fb8d2bf23e110487cdefe",
+  measurementId: "G-F6WDE08F2X"
+};
+
+try{
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  try{ await signInAnonymously(getAuth(app)); }
+  catch(e){ console.warn('Anonymous sign-in not available:', e.code || e); }
+  window.__fb = { db, m:{ collection, doc, setDoc, updateDoc, deleteDoc, getDoc, onSnapshot, deleteField } };
+  window.dispatchEvent(new Event('fb-ready'));
+}catch(e){
+  console.error('Firebase failed to start', e);
+  window.__fbError = e;
+  window.dispatchEvent(new Event('fb-failed'));
+}
+</script>
+
+<script>
+/* ============================================================
+   FRAMEWORK DATA — 11 phases, tasks, deliverables, 45-day timing
+   s/e = start/end day of the task window; due = deliverable due day
+   ============================================================ */
+const CYCLE_DAYS = 45;
+const PHASES = [
+  {num:1, title:"Prospecting & Initial Contact", owner:"Account Officer / Account Manager", start:1, end:3,
+   objective:"Establish first contact with a target clinic and secure enough interest to move into a Sales Introduction.",
+   competency:"Prospecting and lead research, outreach scripting, rapport building, CRM data entry discipline.",
+   tasks:[
+     {t:"Research target clinic: specialty, size, location, estimated patient volume", s:1, e:1, eff:"1–2 hrs"},
+     {t:"Initiate contact via SMS, DSMS, call, or in-person visit", s:1, e:1, eff:"Same day as research"},
+     {t:"Identify and verify the correct decision-maker (owner, clinic manager, or medical director)", s:1, e:2, eff:"Within 48 hrs"},
+     {t:"Deliver a brief company/product introduction to gauge interest", s:2, e:3, eff:"10–15 min call or visit"},
+     {t:"Log the contact attempt and clinic profile in the GHL", s:1, e:3, eff:"15 min, same day as each contact"}],
+   deliverables:[
+     {t:"GHL entry with clinic profile and contact log", due:1},
+     {t:"Lead source and outreach channel tagged", due:1},
+     {t:"Verified decision-maker name and contact details", due:2}]},
+  {num:2, title:"Sales Introduction & Qualification", owner:"Account Officer / Account Manager", start:3, end:6,
+   objective:"Confirm the clinic's basic interest and readiness to receive a full sales presentation.",
+   competency:"Active listening, needs-discovery questioning, foundational product knowledge, clean lead handoff.",
+   tasks:[
+     {t:"Conduct a brief discovery conversation on needs, pain points, and current situation", s:3, e:4, eff:"30–45 min call"},
+     {t:"Explain the value proposition at a high level", s:4, e:4, eff:"Same call"},
+     {t:"Gauge receptiveness and mark status as \"Sales Intro Done\" in the CRM", s:4, e:4, eff:"Same day"}],
+   deliverables:[
+     {t:"Discovery notes (needs, pain points, current supplier/situation, etc)", due:5},
+     {t:"Clinic Qualification Matrix completed and logged into GHL", due:6}]},
+  {num:3, title:"Product Presentation", owner:"Account Officer / Account Manager", start:7, end:11,
+   objective:"Deliver a competent sales presentation and qualify the clinic thoroughly — including whether a Medical Presentation is genuinely required.",
+   competency:"Full presentation delivery, objection handling, qualification frameworks, working clinical literacy, sound decision judgment.",
+   tasks:[
+     {t:"Deliver the full sales presentation: product, pricing, value proposition, case studies", s:7, e:10, eff:"Book Day 7–9 · present by Day 10 (60–90 min)"},
+     {t:"Handle objections raised during the presentation", s:10, e:10, eff:"During the presentation"},
+     {t:"Assess the clinical complexity of the clinic's questions against own competency", s:10, e:10, eff:"Same day"},
+     {t:"Decide whether a Medical Discussion is required", s:11, e:11, eff:"Within 24 hrs"}],
+   deliverables:[
+     {t:"Documented sales presentation delivery (Slack and GHL)", due:10},
+     {t:"Medical Presentation decision (Yes/No) with written justification logged in GHL", due:11}]},
+  {num:4, title:"Medical Discussion (Conditional)", owner:"Account owner + Medical Team", start:12, end:17, conditional:true,
+   objective:"Address clinical or technical questions that exceed the Account Manager's competency, without losing ownership of the relationship.",
+   competency:"Cross-functional coordination, technical briefing/hand-off writing, relationship-continuity management.",
+   tasks:[
+     {t:"Submit a Medical Presentation Request with justification, clinic profile, and open questions", s:12, e:12, eff:"30 min"},
+     {t:"Schedule the session with the Medical Team and the clinic", s:12, e:13, eff:"Confirm within 48 hrs"},
+     {t:"Attend the session to preserve relationship continuity", s:16, e:16, eff:"45–60 min session"},
+     {t:"Capture the clinical Q&A outcomes for the deal record", s:17, e:17, eff:"Within 24 hrs"}],
+   deliverables:[
+     {t:"Medical Presentation Request Form", due:12},
+     {t:"Confirmed schedule with Medical Team and clinic", due:13},
+     {t:"Medical Presentation delivered", due:16},
+     {t:"Clinical Q&A summary notes", due:17}]},
+  {num:5, title:"MOU / MOA Creation", owner:"Account Officer / Account Manager", start:12, end:17,
+   objective:"Formalize agreed terms into an MOU that is accurate and internally approved.",
+   competency:"MOU/contract drafting fundamentals, terms accuracy, escalation protocol.",
+   tasks:[
+     {t:"Draft the MOU/ MOA based on agreed terms", s:12, e:13, eff:"2–3 hrs"},
+     {t:"Route the draft for internal review and approval", s:14, e:16, eff:"2 business days"},
+     {t:"Send the approved MOU to the clinic for review", s:17, e:17, eff:"Same day as approval"}],
+   deliverables:[
+     {t:"Draft MOU", due:13},
+     {t:"Internal approval sign-off", due:16},
+     {t:"MOU sent to clinic", due:17}]},
+  {num:6, title:"Follow-up and Negotiation", owner:"Account Officer / Account Manager", start:18, end:32,
+   objective:"Nurture confirmed interest into a firm commitment to proceed with the partnership.",
+   competency:"Negotiation, structured persistence, closing-signal recognition.",
+   tasks:[
+     {t:"Follow up on a fixed cadence: 3, 5, 7, 15 days after, then monthly (as needed)", s:20, e:32, eff:"Touchpoints on Days 20, 22, 24, 32 · 15 min each"},
+     {t:"Resolve remaining objections or open questions", s:20, e:28, eff:"Handled at each touchpoint"},
+     {t:"Reconfirm alignment with all relevant decision-makers", s:24, e:26, eff:"One 30-min call or meeting"},
+     {t:"Negotiate preliminary commercial terms", s:24, e:30, eff:"1–2 sessions"}],
+   deliverables:[
+     {t:"Follow-up log with outcomes", due:32},
+     {t:"Proof of commitment to proceed", due:32}]},
+  {num:7, title:"MOU Signing", owner:"Account Officer / Account Manager", start:32, end:35,
+   objective:"Secure a fully signed, mutually agreed MOU from the clinic — and revise it if needed.",
+   competency:"Closing discipline, follow-through, document tracking, attention to detail.",
+   tasks:[
+     {t:"Facilitate any final clinic review or questions", s:32, e:33, eff:"One call"},
+     {t:"Coordinate signatures from both parties", s:33, e:35, eff:"Within 3 days"}],
+   deliverables:[
+     {t:"Fully signed MOU", due:35},
+     {t:"Tag as “Won” in GHL", due:35}]},
+  {num:8, title:"Payment and Delivery Terms Confirmation", owner:"Account Officer / Account Manager", start:35, end:40,
+   objective:"Confirm the clinic has fulfilled the initial commercial terms of the MOU before onboarding is considered complete.",
+   competency:"Commercial/financial acumen, follow-up discipline, cross-department coordination.",
+   tasks:[
+     {t:"Confirm payment terms and schedule with the clinic", s:35, e:35, eff:"Same day as signing"},
+     {t:"Coordinate delivery and logistics terms", s:36, e:37, eff:"Within 2 days"},
+     {t:"Follow up on the initial payment or purchase order", s:36, e:40, eff:"Every 48 hrs until received"},
+     {t:"Escalate delays to the Business Development Director when needed", s:40, e:40, eff:"If unpaid by Day 40"}],
+   deliverables:[
+     {t:"Payment confirmation record", due:40},
+     {t:"Delivery/logistics confirmation", due:37},
+     {t:"Purchase order or invoice initiated", due:36}]},
+  {num:9, title:"Acquisition Onboarding Completion", owner:"Account owner → BD Director (QA)", start:41, end:43,
+   objective:"Confirm every pre-handover requirement is complete and the clinic file is ready for Clinic Success.",
+   competency:"Documentation accuracy, summarization, quality-assurance mindset.",
+   tasks:[
+     {t:"Complete the full Onboarding Checklist, verifying every prior deliverable", s:41, e:41, eff:"2 hrs"},
+     {t:"Prepare the Clinic Handover Brief: profile, needs, agreed terms, history, key contacts, special notes", s:41, e:42, eff:"Half day"},
+     {t:"Submit the file for internal QA review by the BD Director", s:42, e:43, eff:"1 business day turnaround"}],
+   deliverables:[
+     {t:"Completed Onboarding Checklist", due:41},
+     {t:"Clinic Handover Brief/ Checklist", due:43}]},
+  {num:10, title:"Clinic Success Onboarding", owner:"Account owner → Clinic Success", start:44, end:45,
+   objective:"Transition the clinic relationship to Clinic Success with zero information loss and a warm introduction.",
+   competency:"Relationship-transition management, clear communication, cross-team collaboration.",
+   tasks:[
+     {t:"Facilitate a handover meeting with the Clinic Success team (done every Monday)", s:44, e:45, eff:"First Monday on or after Day 44 · 45 min"},
+     {t:"Walk through the Clinic Handover Brief in full", s:44, e:45, eff:"Same meeting"},
+     {t:"Introduce the clinic's primary contact to the Clinic Success representative", s:45, e:45, eff:"Same day as meeting"},
+     {t:"Obtain formal sign-off/acceptance from Clinic Success", s:45, e:45, eff:"Before close of meeting day"}],
+   deliverables:[
+     {t:"Handover meeting held", due:45},
+     {t:"Clinic Success acceptance sign-off logged in GHL", due:45}]},
+  {num:11, title:"Clinic Success Full Hand-over", owner:"Account owner → Clinic Success Manager", post:true, postLabel:"Month 6 (≈ Day 180)",
+   objective:"Full transition of the clinic relationship to Clinic Success for business continuity after 6 months.",
+   competency:"Relationship-transition management, clear communication, cross-team collaboration.",
+   tasks:[
+     {t:"Full endorsement via email, SMS, DSMS, and other communication channels for the MAIN POC assignment shift to the CSM.", eff:"At month 6 · one coordinated send-out"}],
+   deliverables:[
+     {t:"Clinic officially transitioned out of the sales pipeline", dueLabel:"Month 6"}]},
+];
+
+/* ============================================================
+   ORG CHART DATA (from the B2B | RVI wholesale organizational chart)
+   ============================================================ */
+const AO_TARGET = 3.5; // ₱M per Account Officer per month
+const TERRITORIES = [
+  {name:"NCR", am:{label:"Account Manager #1 of 4", status:"Filled"},
+   aos:[{n:1, area:"NCR", status:"Filled"},{n:2, area:"NCR", status:"Wave 1"},{n:3, area:"NCR", status:"Wave 1"}]},
+  {name:"South Luzon", am:{label:"Account Manager #2 of 4", status:"Filled"},
+   aos:[{n:4, area:"South Luzon", status:"Wave 1"},{n:5, area:"South Luzon", status:"Wave 2"},{n:6, area:"South Luzon", status:"Wave 3"}]},
+  {name:"North Luzon", am:{label:"Account Manager #3 of 4", status:"Wave 1 (to confirm)"},
+   aos:[{n:7, area:"North Luzon", status:"Wave 1"},{n:8, area:"North Luzon", status:"Wave 2"},{n:9, area:"North Luzon", status:"Wave 3"}]},
+  {name:"VisMin", am:{label:"Account Manager #4 of 4", status:"Filled"},
+   aos:[{n:10, area:"Visayas", status:"Wave 2"},{n:11, area:"Mindanao", status:"Wave 2"},{n:12, area:"Mindanao", status:"Wave 3"}]},
+];
+const HEAD_AP = {now:3.5, full:6};
+const SUPPORT = [
+  {role:"Clinic Success Manager", count:"#1 of 1", target:"₱5M reorders / month", note:"BDD oversight", value:5},
+  {role:"Jr. Clinic Success Manager", count:"#1 of 1", target:"₱3.5M reorders / month", note:"BDD oversight", value:3.5},
+  {role:"Sales Enablement Officer", count:"#1 of 1", target:"Pipeline with BDD and SGD", note:"No revenue quota", value:0},
+];
+
+const ROLES = [
+  {role:"BD Director", desc:"Leads B2B. Final escalation point for the whole team across every phase, receives payment-delay escalations (Phase 8) and runs the QA review of onboarding files (Phase 9).", target:"Leads the ₱56.5M structure"},
+  {role:"Head of Affiliates & Partnerships", desc:"Owns the end-to-end sales process for referrals from existing affiliates, and drives demand generation for new leads, which are endorsed to the territory teams for onboarding.", target:"₱3.5M now · ₱6M at full ramp"},
+  {role:"Account Manager (4 — one per territory)", desc:"Leads a territory — NCR, South Luzon, North Luzon or VisMin — and the three Account Officers who report to them. Runs the same onboarding funnel and carries the territory team target.", target:"Team target ₱10.5M (3 × ₱3.5M)"},
+  {role:"Account Officer (12)", desc:"Runs the full onboarding funnel, Phases 1–10, for clinics in their territory: prospecting, presentation, qualification, MOU, payment follow-up and handover.", target:"₱3.5M / month"},
+  {role:"Medical Team", desc:"Delivers the Medical Discussion (Phase 4) only when clinical questions exceed the account owner's competency.", target:"Conditional"},
+  {role:"Clinic Success (under the COO)", desc:"Receives onboarded clinics at the Monday handover (Phase 10) and becomes the main point of contact at month 6 (Phase 11). Reorder targets carry BDD oversight.", target:"CSM ₱5M · Jr. CSM ₱3.5M reorders"},
+];
+
+const QUALIFICATION_TIERS = [
+  {cls:"tier-1", tier:"Tier 1", label:"Key Account Potential", range:"₱1,000,000+ / month",
+   desc:"Leads with the patient volume, capacity, and commercial profile to grow into a key account — a clinic capable of sustaining at least ₱1M in revenue per month. Highest priority for onboarding."},
+  {cls:"tier-2", tier:"Tier 2", label:"Mid-Tier Potential", range:"₱300,000 – ₱900,000 / month",
+   desc:"Leads with solid, sustainable order potential in the ₱300K–₱900K monthly range. Strong secondary priority once Tier 1 accounts are in motion."},
+  {cls:"tier-3", tier:"Tier 3", label:"Entry-Tier Potential", range:"Below ₱300,000 / month",
+   desc:"Leads generating under ₱300K per month, and sometimes inconsistent in ordering month to month. Onboard opportunistically; not a prospecting priority."},
+];
+const CRIT_YES = [
+  "The clinic's questions concern clinical efficacy, safety data, or procedure-specific protocols beyond the account owner's working knowledge",
+  "A medical director or practicing physician expects a peer-level clinical discussion",
+  "The clinic raises regulatory, compliance, or contraindication questions requiring specialist input",
+  "The clinic explicitly requests clinical case studies or data the account owner cannot credibly present",
+];
+const CRIT_NO = [
+  "The account owner can confidently answer all product, clinical-overview, and efficacy questions raised",
+  "The clinic's concerns are primarily commercial (pricing, logistics, terms) rather than clinical",
+  "No specific clinical stakeholder has requested a specialist-level discussion",
+];
+const COMPETENCY_MATRIX = [
+  {role:"Account Officer", items:["Lead research and prospecting","Outreach scripting (SMS/DSMS/call/in-person)","Discovery and Clinic Qualification Matrix","Full sales presentation delivery","Objection handling","Working clinical literacy","Judgment on when Medical is truly needed","MOU drafting fundamentals","Follow-up cadence discipline","GHL data hygiene"]},
+  {role:"Account Manager", items:["Everything expected of an Account Officer","Territory pipeline management","Coaching and first-line escalation for Account Officers","Negotiation and closing","Cross-functional coordination","Ownership of the ₱10.5M team target"]},
+  {role:"Head of Affiliates & Partnerships", items:["End-to-end ownership of existing-affiliate referral sales","Demand generation for new leads","Lead endorsement to territory teams","Partnership strategy","Sales coaching"]},
+  {role:"BD Director", items:["Final escalation resolution across all phases","QA review of onboarding files (Phase 9)","Commercial judgment calls beyond team authority","Cross-functional arbitration"]},
+];
+const HANDOVER_CRITERIA = [
+  "Sales presentation delivered and documented in Slack and GHL",
+  "Clinic Qualification Matrix completed and logged in GHL",
+  "Medical Discussion decision logged in GHL — and delivered, if required",
+  "MOU / MOA fully signed by both parties and the account tagged “Won” in GHL",
+  "Payment confirmation recorded and delivery/logistics terms confirmed",
+  "Onboarding Checklist complete for Phases 1–9, with dates and supervisor initials",
+  "Clinic Handover Brief prepared and QA-reviewed by the BD Director",
+  "Handover meeting held on the Monday slot and Clinic Success acceptance logged in GHL",
+];
+
+/* ============================================================
+   DATA LAYER — Firebase Firestore (shared, live) with a
+   this-browser-only fallback if the database can't be reached.
+   Firestore layout:
+     apps/b2b-onboarding/accounts/{accountId}      account profile
+     apps/b2b-onboarding/checklists/{accountId}    { items: { itemId: item } }
+     apps/b2b-onboarding/config/template           default checklist template
+   ============================================================ */
+const TEMPLATE_VERSION = '2026-11-v2';
+const LOCAL_NS = 'regenesys-b2b-onboarding-v2:';
+const APP_PATH = ['apps','b2b-onboarding'];
+const DB = { mode:'connecting', fb:null, unsub:[] };
+
+function setConn(mode, detail){
+  DB.mode = mode;
+  const el = document.getElementById('connStatus'); if(!el) return;
+  const map = {
+    connecting:['conn-wait','Connecting…','Connecting to the shared database'],
+    live:['conn-live','Live · shared','Saved to the shared database — changes appear for everyone in real time'],
+    local:['conn-local','This browser only', detail || 'Could not reach the shared database — changes are saved in this browser only'],
+  };
+  const [cls, label, title] = map[mode];
+  el.className = 'conn ' + cls; el.querySelector('span').textContent = label; el.title = title;
+}
+function waitForFirebase(ms){
+  return new Promise(res=>{
+    if(window.__fb) return res(window.__fb);
+    if(window.__fbError) return res(null);
+    const t = setTimeout(()=>res(null), ms);
+    window.addEventListener('fb-ready', ()=>{ clearTimeout(t); res(window.__fb); }, {once:true});
+    window.addEventListener('fb-failed', ()=>{ clearTimeout(t); res(null); }, {once:true});
+  });
+}
+function fbRefs(){
+  const {db, m} = DB.fb;
+  return {
+    accounts: m.collection(db, ...APP_PATH, 'accounts'),
+    checklists: m.collection(db, ...APP_PATH, 'checklists'),
+    account: id => m.doc(db, ...APP_PATH, 'accounts', id),
+    checklist: id => m.doc(db, ...APP_PATH, 'checklists', id),
+    template: m.doc(db, ...APP_PATH, 'config', 'template'),
+  };
+}
+function itemsFromMap(map){ return Object.values(map||{}).sort((a,b)=>(a.order??0)-(b.order??0)); }
+function itemsToMap(items){ const o={}; items.forEach((it,i)=>{ if(it.order==null) it.order=i; o[it.id]=clean(it); }); return o; }
+function clean(obj){ return JSON.parse(JSON.stringify(obj)); } // strips undefined for Firestore
+
+/* --- local fallback helpers --- */
+function lGet(k){ try{ const v = localStorage.getItem(LOCAL_NS+k); return v?JSON.parse(v):null; }catch(e){ return null; } }
+function lSet(k,v){ try{ localStorage.setItem(LOCAL_NS+k, JSON.stringify(v)); }catch(e){ toast('Could not save — browser storage is blocked.', 'error'); } }
+function lDel(k){ try{ localStorage.removeItem(LOCAL_NS+k); }catch(e){} }
+
+async function dbInit(){
+  setConn('connecting');
+  const fb = await waitForFirebase(8000);
+  if(fb){
+    DB.fb = fb;
+    try{ await fbStart(); setConn('live'); return; }
+    catch(e){
+      console.error(e);
+      DB.unsub.forEach(u=>{ try{u();}catch(_){} }); DB.unsub = [];
+      const denied = e && (e.code==='permission-denied' || String(e).includes('permission'));
+      localStart();
+      setConn('local', denied ? 'The shared database refused access (check Firestore rules / Anonymous sign-in) — changes are saved in this browser only' : undefined);
+      toast(denied ? 'Shared database refused access — working in this browser only.' : 'Shared database unreachable — working in this browser only.', 'warn');
+      return;
+    }
+  }
+  localStart(); setConn('local');
+  toast('Shared database unreachable — working in this browser only.', 'warn');
+}
+
+function localStart(){
+  DB.fb = null;
+  let lib = lGet('task-library');
+  if(!lib || lib.version!==TEMPLATE_VERSION){ lib = buildDefaultLibrary(); lSet('task-library', lib); }
+  state.library = lib;
+  state.accounts = lGet('accounts') || [];
+  state.accounts.forEach(a=>{ const c = lGet('checklist:'+a.id); if(c) state.checklistCache[a.id] = c; });
+}
+
+async function fbStart(){
+  const R = fbRefs(), m = DB.fb.m;
+  // Template
+  const tSnap = await m.getDoc(R.template);
+  let lib = tSnap.exists() ? tSnap.data() : null;
+  if(!lib || lib.version!==TEMPLATE_VERSION){ lib = buildDefaultLibrary(); await m.setDoc(R.template, clean(lib)); }
+  state.library = lib;
+  // Live listeners — resolve once both first snapshots arrive
+  await new Promise((resolve, reject)=>{
+    let gotA=false, gotC=false, settled=false;
+    const done = ()=>{ if(gotA && gotC && !settled){ settled=true; resolve(); } };
+    const fail = e=>{ if(!settled){ settled=true; reject(e); } else { console.error(e); setConn('local','Lost connection to the shared database'); } };
+    DB.unsub.push(m.onSnapshot(R.accounts, snap=>{
+      state.accounts = snap.docs.map(d=>d.data()).sort((a,b)=>String(a.createdAt).localeCompare(String(b.createdAt)));
+      gotA = true; done(); if(settled) scheduleRender();
+    }, fail));
+    DB.unsub.push(m.onSnapshot(R.checklists, snap=>{
+      const next = {};
+      snap.docs.forEach(d=>{ next[d.id] = {items: itemsFromMap(d.data().items)}; });
+      state.checklistCache = next;
+      gotC = true; done(); if(settled) scheduleRender();
+    }, fail));
+    DB.unsub.push(m.onSnapshot(R.template, snap=>{ if(snap.exists()) state.library = snap.data(); }, ()=>{}));
+  });
+}
+
+/* --- writes (each touches only what changed, so teammates don't overwrite each other) --- */
+async function dbWrite(fn){
+  try{ await fn(); }
+  catch(e){ console.error(e); toast('Save failed — ' + (e.code==='permission-denied' ? 'no permission to write to the shared database.' : 'check your connection and try again.'), 'error'); }
+}
+function persistLocalAccounts(){ lSet('accounts', state.accounts); }
+async function saveAccount(account){
+  if(!DB.fb){ persistLocalAccounts(); return; }
+  await dbWrite(()=>DB.fb.m.setDoc(fbRefs().account(account.id), clean(account)));
+}
+async function createChecklist(aid, items){
+  state.checklistCache[aid] = {items};
+  if(!DB.fb){ lSet('checklist:'+aid, state.checklistCache[aid]); return; }
+  await dbWrite(()=>DB.fb.m.setDoc(fbRefs().checklist(aid), {items: itemsToMap(items)}));
+}
+async function saveItem(aid, item){
+  if(!DB.fb){ lSet('checklist:'+aid, state.checklistCache[aid]); return; }
+  await dbWrite(()=>DB.fb.m.updateDoc(fbRefs().checklist(aid), {['items.'+item.id]: clean(item)}));
+}
+async function deleteItemRecord(aid, iid){
+  if(!DB.fb){ lSet('checklist:'+aid, state.checklistCache[aid]); return; }
+  await dbWrite(()=>DB.fb.m.updateDoc(fbRefs().checklist(aid), {['items.'+iid]: DB.fb.m.deleteField()}));
+}
+async function deleteAccountRecords(aid){
+  if(!DB.fb){ persistLocalAccounts(); lDel('checklist:'+aid); return; }
+  const R = fbRefs();
+  await dbWrite(async ()=>{ await DB.fb.m.deleteDoc(R.checklist(aid)); await DB.fb.m.deleteDoc(R.account(aid)); });
+}
+async function saveLibrary(){
+  if(!DB.fb){ lSet('task-library', state.library); return; }
+  await dbWrite(()=>DB.fb.m.setDoc(fbRefs().template, clean(state.library)));
+}
+
+/* --- re-render on live changes, without wiping what someone is typing --- */
+let renderPending = false;
+function isTyping(){
+  const a = document.activeElement;
+  return a && a.tagName==='INPUT' && ['text','date','search',''].includes(a.type) && !!a.closest('#detailContent');
+}
+function scheduleRender(){
+  if(isTyping()){ renderPending = true; return; }
+  renderPending = false;
+  if(state.activeAccountId && !state.accounts.find(a=>a.id===state.activeAccountId)){
+    state.activeAccountId = null;
+    document.getElementById('detailEmpty').style.display='block';
+    document.getElementById('detailContent').style.display='none';
+  }
+  renderChecklistSidebar();
+  if(state.activeAccountId && state.checklistCache[state.activeAccountId]) renderAccountDetail();
+  refreshDashboard();
+}
+document.addEventListener('focusout', ()=>{ setTimeout(()=>{ if(renderPending) scheduleRender(); }, 0); });
+
+/* ============================================================
+   PASSWORD GATE for deletions (SHA-256, plain text not stored)
+   ============================================================ */
+const PW_HASH = '431308833e15e3c992b2eec34ed6083202562e18b58f2eb304e056bc6583f660';
+const UNLOCK_MS = 5*60*1000;
+let unlockedUntil = 0;
+async function sha256Hex(str){
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+async function checkPassword(pw){
+  if(window.crypto && crypto.subtle){ return (await sha256Hex(pw)) === PW_HASH; }
+  return pw === String.fromCharCode(114,101,103,101,110,101,115,121,115,115,97,108,101,115);
+}
+let pwResolver = null;
+function requirePassword(description){
+  if(Date.now() < unlockedUntil) return Promise.resolve(true);
+  document.getElementById('pwDesc').textContent = description + ' Enter the password to continue.';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  openModal('pwModal');
+  setTimeout(()=>document.getElementById('pwInput').focus(), 50);
+  return new Promise(res=>{ pwResolver = res; });
+}
+function closePw(result){ closeModal('pwModal'); if(pwResolver){ pwResolver(result); pwResolver=null; } }
+async function submitPw(){
+  const ok = await checkPassword(document.getElementById('pwInput').value);
+  if(!ok){ document.getElementById('pwError').textContent = 'Incorrect password.'; return; }
+  unlockedUntil = Date.now() + UNLOCK_MS;
+  toast('Delete access unlocked for 5 minutes.');
+  closePw(true);
+}
+document.getElementById('pwConfirm').addEventListener('click', submitPw);
+document.getElementById('pwCancel').addEventListener('click', ()=>closePw(false));
+document.getElementById('pwCancelX').addEventListener('click', ()=>closePw(false));
+document.getElementById('pwInput').addEventListener('keydown', e=>{ if(e.key==='Enter') submitPw(); if(e.key==='Escape') closePw(false); });
+
+/* ============================================================
+   STATE + HELPERS
+   ============================================================ */
+const state = { library:[], accounts:[], checklistCache:{}, activeAccountId:null, openPhaseIds:new Set() };
+function uid(p){ return p + '_' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escAttr(s){ return esc(s); }
+function peso(m){ return '₱' + (Number.isInteger(m) ? m : m.toFixed(1)) + 'M'; }
+function todayISO(){ const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); }
+function fmtDate(iso){ if(!iso) return ''; const d = new Date(iso.length===10 ? iso+'T00:00:00' : iso); return d.toLocaleDateString('en-PH',{year:'numeric',month:'short',day:'numeric'}); }
+function phaseMeta(n){ return PHASES.find(p=>p.num===n); }
+function toast(msg, kind){
+  const c = document.getElementById('toast-container'); const el = document.createElement('div');
+  el.className = 'toast' + (kind ? ' '+kind : ''); el.textContent = msg; c.appendChild(el);
+  setTimeout(()=>{ el.style.opacity='0'; el.style.transition='opacity .3s'; setTimeout(()=>el.remove(),300); }, 3200);
+}
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+function buildDefaultLibrary(){
+  return {version:TEMPLATE_VERSION, phases: PHASES.map(p=>({
+    phaseNum:p.num, phaseTitle:p.title,
+    items:[...p.tasks.map((t,i)=>({id:`p${p.num}-t${i}`, text:t.t, type:'task'})),
+           ...p.deliverables.map((d,i)=>({id:`p${p.num}-d${i}`, text:d.t, type:'deliverable'}))]
+  }))};
+}
+function seedItemsFromLibrary(){
+  const items = [];
+  state.library.phases.forEach(ph=>ph.items.forEach(li=>items.push({id:uid('it'), order:items.length, phaseNum:ph.phaseNum, phaseTitle:ph.phaseTitle, text:li.text, type:li.type, completed:false, completedDate:'', confirmedBy:''})));
+  return items;
+}
+function isApplicable(item, account){ return !(item.phaseNum===4 && !account.medicalRequired); }
+function computeStats(account){
+  const cl = state.checklistCache[account.id] || {items:[]};
+  const items = cl.items.filter(i=>isApplicable(i, account));
+  const total = items.length, completed = items.filter(i=>i.completed).length;
+  const percent = total ? Math.round(completed/total*100) : 0;
+  const missingInitials = items.filter(i=>i.completed && !String(i.confirmedBy||'').trim()).length;
+  const pre = items.filter(i=>i.phaseNum==null || i.phaseNum<=9);
+  const preDone = pre.length>0 && pre.every(i=>i.completed);
+  const phaseStatus = PHASES.map(p=>{
+    const its = cl.items.filter(i=>i.phaseNum===p.num);
+    if(p.num===4 && !account.medicalRequired) return 'na';
+    return its.length && its.every(i=>i.completed) ? 'done' : 'open';
+  });
+  const curIdx = phaseStatus.findIndex(s=>s==='open');
+  return {total, completed, percent, missingInitials, preDone, phaseStatus, currentPhase: curIdx===-1 ? null : PHASES[curIdx].num};
+}
+function statusOf(account, stats){
+  if(account.endorsedAt && stats.percent===100) return {key:'complete', label:'Fully handed over', cls:'badge-complete'};
+  if(account.endorsedAt) return {key:'endorsed', label:'With Clinic Success', cls:'badge-endorsed'};
+  if(stats.preDone) return {key:'ready', label:'Ready to endorse', cls:'badge-ready'};
+  return {key:'progress', label:'In progress', cls:'badge-progress'};
+}
+async function getChecklist(id){
+  if(state.checklistCache[id]) return state.checklistCache[id];
+  await createChecklist(id, seedItemsFromLibrary());   // account without a checklist yet
+  return state.checklistCache[id];
+}
+
+/* ============================================================
+   GUIDE
+   ============================================================ */
+function statusChip(s){
+  const cls = s==='Filled' ? 'st-filled' : s.includes('to confirm') ? 'st-tbc' : s==='Wave 1' ? 'st-w1' : s==='Wave 2' ? 'st-w2' : 'st-w3';
+  return `<span class="status-chip ${cls}">${esc(s)}</span>`;
+}
+function renderGuide(){
+  const teamTarget = 3*AO_TARGET;                         // 10.5
+  const teamsTotal = TERRITORIES.length*teamTarget;      // 42
+  const csTotal = SUPPORT.reduce((s,x)=>s+x.value,0);    // 8.5
+  const fullQuota = teamsTotal + HEAD_AP.full + csTotal; // 56.5
+  const aoCount = TERRITORIES.reduce((s,t)=>s+t.aos.length,0);
+  const heads = 1 + TERRITORIES.length + aoCount + SUPPORT.length; // 20
+
+  document.getElementById('kpiRow').innerHTML = [
+    {l:'Headcount', v:heads, s:'full structure, under the BD Director'},
+    {l:'Monthly quota', v:peso(fullQuota), s:'full structure'},
+    {l:'Territory teams', v:TERRITORIES.length, s:`${peso(teamTarget)} team target each`},
+    {l:'Account Officers', v:aoCount, s:`${peso(AO_TARGET)} each per month`},
+  ].map(k=>`<div class="kpi"><div class="kpi-label">${k.l}</div><div class="kpi-value">${k.v}</div><div class="kpi-sub">${k.s}</div></div>`).join('');
+
+  document.getElementById('quotaBuild').innerHTML = `
+    <div style="font-size:11px; font-weight:900; letter-spacing:.08em; text-transform:uppercase; color:var(--pink); margin-bottom:6px;">How the ${peso(fullQuota)} monthly quota is built</div>
+    <table>
+      <tr><td>Territory teams</td><td class="calc">${TERRITORIES.length} teams × 3 Account Officers × ${peso(AO_TARGET)}</td><td class="num">${peso(teamsTotal)}</td></tr>
+      <tr><td>Head of Affiliates &amp; Partnerships</td><td class="calc">at full ramp (${peso(HEAD_AP.now)} now)</td><td class="num">${peso(HEAD_AP.full)}</td></tr>
+      <tr><td>Clinic Success reorders</td><td class="calc">CSM ${peso(5)} + Jr. CSM ${peso(3.5)}</td><td class="num">${peso(csTotal)}</td></tr>
+      <tr><td>Total — full structure</td><td class="calc">${heads} heads</td><td class="num">${peso(fullQuota)}</td></tr>
+    </table>
+    <div style="font-size:11.5px; color:var(--muted); margin-top:8px;">Headcount: 1 Head of Affiliates &amp; Partnerships + ${TERRITORIES.length} Account Managers + ${aoCount} Account Officers + ${SUPPORT.length} supporting roles = ${heads}.</div>`;
+
+  document.getElementById('leaderGrid').innerHTML = `
+    <div class="leader-card"><h4>BD Director</h4><div class="meta">Leads B2B</div><span class="target">Accountable for ${peso(fullQuota)} / month</span></div>
+    <div class="leader-card"><h4>Head of Affiliates &amp; Partnerships</h4><div class="meta">#1 of 1 &nbsp;${statusChip('Filled')}</div><span class="target">${peso(HEAD_AP.now)} now · ${peso(HEAD_AP.full)} at full ramp</span></div>`;
+
+  document.getElementById('territoryGrid').innerHTML = TERRITORIES.map(t=>`
+    <div class="territory-card">
+      <div class="territory-head">
+        <div class="t-name">${esc(t.name)}</div>
+        <div class="t-am"><span>${esc(t.am.label)}</span>${statusChip(t.am.status)}</div>
+        <div class="t-target">Team target ${peso(teamTarget)} <span style="color:var(--muted); font-weight:400;">(3 × ${peso(AO_TARGET)})</span></div>
+      </div>
+      <ul class="ao-list">${t.aos.map(a=>`
+        <li><span class="ao-name"><b>Account Officer #${a.n} of 12</b><span>${esc(a.area)} · ${peso(AO_TARGET)} / month</span></span>${statusChip(a.status)}</li>`).join('')}
+      </ul>
+    </div>`).join('');
+
+  document.getElementById('supportRow').innerHTML = SUPPORT.map(s=>`
+    <div class="leader-card"><h4>${esc(s.role)}</h4><div class="meta">${esc(s.count)} · ${esc(s.note)}</div><span class="target">${esc(s.target)}</span></div>`).join('');
+
+  // Hiring-wave table
+  const waves = ['Filled','Wave 1','Wave 2','Wave 3'];
+  const cellFor = (t,w) => {
+    const aos = t.aos.filter(a=>a.status===w).map(a=>`AO #${a.n}${t.name==='VisMin' ? ' ('+a.area+')' : ''}`);
+    const am = (t.am.status===w || (w==='Wave 1' && t.am.status.startsWith('Wave 1'))) ? [`Account Manager${t.am.status.includes('confirm')?' (to confirm)':''}`] : [];
+    const all = [...am, ...aos];
+    return all.length ? all.join('<br>') : '<span style="color:var(--muted);">—</span>';
+  };
+  let cum = 0;
+  const footCells = waves.map(w=>{
+    const n = TERRITORIES.reduce((s,t)=>s+t.aos.filter(a=>a.status===w).length,0);
+    const add = n*AO_TARGET; cum += add;
+    return `<td><span class="num">${n} AO · +${peso(add)}</span><br><span style="font-weight:400; font-size:11.5px; color:var(--muted);">AO quota live: ${peso(cum)}</span></td>`;
+  }).join('');
+  document.getElementById('waveTable').innerHTML = `
+    <thead><tr><th>Territory</th>${waves.map(w=>`<th>${w==='Filled'?'Filled now':w}</th>`).join('')}<th>Team target</th></tr></thead>
+    <tbody>${TERRITORIES.map(t=>`<tr><td class="t">${esc(t.name)}</td>${waves.map(w=>`<td>${cellFor(t,w)}</td>`).join('')}<td class="num">${peso(teamTarget)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr><td>Account Officer quota</td>${footCells}<td class="num">${peso(teamsTotal)}</td></tr></tfoot>`;
+
+  document.getElementById('rolesGrid').innerHTML = ROLES.map(r=>`<div class="role-card"><b>${esc(r.role)}</b><p>${esc(r.desc)}</p>${r.target?`<span class="role-target">${esc(r.target)}</span>`:''}</div>`).join('');
+
+  document.getElementById('tierGrid').innerHTML = QUALIFICATION_TIERS.map(t=>`
+    <div class="tier-card ${t.cls}"><span class="tier-badge">${esc(t.tier)}</span><h4>${esc(t.label)}</h4><span class="tier-range">${esc(t.range)}</span><p>${esc(t.desc)}</p></div>`).join('');
+
+  document.getElementById('guidePhaseAccordion').innerHTML = PHASES.map(p=>`
+    <div class="phase-row">
+      <div class="phase-header" onclick="this.parentElement.classList.toggle('open')">
+        <div class="phase-header-left">
+          <div class="phase-num ${p.conditional?'cond':''} ${p.post?'post':''}">${p.num}</div>
+          <div><div class="phase-header-title">${esc(p.title)}</div><div class="phase-header-owner">${esc(p.owner)}</div></div>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;"><span class="phase-window">${p.post ? esc(p.postLabel) : `Day ${p.start}–${p.end}`}</span><span class="chev">▶</span></div>
+      </div>
+      <div class="phase-body"><div class="phase-body-inner">
+        <div class="phase-obj">${esc(p.objective)}</div>
+        <div class="phase-cols">
+          <div><div class="phase-col-label">Tasks</div><ul class="phase-list">${p.tasks.map(t=>`<li>${esc(t.t)}</li>`).join('')}</ul></div>
+          <div><div class="phase-col-label">Deliverables</div><ul class="phase-list">${p.deliverables.map(d=>`<li>${esc(d.t)}</li>`).join('')}</ul></div>
+        </div>
+        <div class="phase-comp"><b>Core competency:</b> ${esc(p.competency)}</div>
+      </div></div>
+    </div>`).join('');
+
+  document.getElementById('critYes').innerHTML = CRIT_YES.map(t=>`<li>${esc(t)}</li>`).join('');
+  document.getElementById('critNo').innerHTML = CRIT_NO.map(t=>`<li>${esc(t)}</li>`).join('');
+  document.querySelector('#compTable tbody').innerHTML = COMPETENCY_MATRIX.map(r=>`<tr><td class="comp-role">${esc(r.role)}</td><td>${r.items.map(esc).join(' · ')}</td></tr>`).join('');
+  document.getElementById('handoverCriteriaList').innerHTML = HANDOVER_CRITERIA.map((t,i)=>`<li><span class="hc-num">${i+1}</span><span>${esc(t)}</span></li>`).join('');
+}
+
+/* ============================================================
+   FLOWCHART — fixed coordinates, one spine, loops in separate lanes
+   ============================================================ */
+function renderFlow(){
+  const C = {purple:'#4E00A6', dark:'#2A0A52', lilac:'#F4EEFB', lilacLine:'#692FA2', green:'#2E7D5B', coral:'#E86949', pink:'#D94A85', ink:'#1F1A2B', muted:'#6E6878'};
+  const X = 340, BW = 280, BH = 60, DW = 120, DH = 54;
+  let s = '';
+  const t = (x,y,txt,o={}) => `<text x="${x}" y="${y}" text-anchor="${o.anchor||'middle'}" font-size="${o.size||14}" font-weight="${o.weight||700}" fill="${o.fill||C.ink}" ${o.family?`font-family="${o.family}"`:''} ${o.italic?'font-style="italic"':''}>${txt}</text>`;
+  const box = (cy, l1, l2, sub) => {
+    let r = `<rect x="${X-BW/2}" y="${cy-BH/2}" width="${BW}" height="${BH}" rx="10" fill="${C.purple}"/>`;
+    if(sub){ r += t(X, cy-4, l1, {fill:'#fff', size:14.5, family:'Raleway, sans-serif'}) + t(X, cy+15, sub, {fill:'#DCCBF2', size:11, weight:400}); }
+    else if(l2){ r += t(X, cy-4, l1, {fill:'#fff', size:14.5, family:'Raleway, sans-serif'}) + t(X, cy+15, l2, {fill:'#fff', size:14.5, family:'Raleway, sans-serif'}); }
+    else r += t(X, cy+5, l1, {fill:'#fff', size:14.5, family:'Raleway, sans-serif'});
+    return r;
+  };
+  const diamond = (cy, l1, l2) => `<polygon points="${X},${cy-DH} ${X+DW},${cy} ${X},${cy+DH} ${X-DW},${cy}" fill="${C.lilac}" stroke="${C.lilacLine}" stroke-width="2"/>` + t(X, cy-3, l1, {size:13, fill:C.dark}) + t(X, cy+14, l2, {size:13, fill:C.dark});
+  const term = (cy, l1, l2) => `<ellipse cx="${X}" cy="${cy}" rx="140" ry="34" fill="url(#gBrand)"/>` + t(X, cy-3, l1, {fill:'#fff', size:15, family:'Raleway, sans-serif', weight:800}) + t(X, cy+15, l2, {fill:'#DCCBF2', size:11, weight:400});
+  const phase = (cy, label, color) => `<rect x="40" y="${cy-11}" width="${label.length*6.6+22}" height="22" rx="11" fill="${color||C.lilac}" stroke="${color?color:C.lilacLine}" stroke-width="1"/>` + t(51, cy+4, label, {anchor:'start', size:10.5, weight:900, fill: color ? '#fff' : C.purple, family:'JetBrains Mono, monospace'});
+  const down = (y1, y2, color, marker) => `<path d="M${X},${y1} L${X},${y2-2}" stroke="${color}" stroke-width="2.25" fill="none" marker-end="url(#${marker})"/>`;
+  const pill = (x, y, label, fg, bg) => `<rect x="${x}" y="${y-11}" width="${label.length*7.2+18}" height="22" rx="11" fill="${bg}" stroke="${fg}" stroke-width="1.25"/>` + t(x+(label.length*7.2+18)/2, y+4.5, label, {size:11, weight:900, fill:fg});
+  const yes = (y1, y2, label='YES') => down(y1, y2, C.green, 'aGreen') + pill(X+10, (y1+y2)/2, label, C.green, '#E8F4EE');
+  const loop = (dcy, laneX, targetY, targetEdgeX, n1, n2) =>
+    `<path d="M${X+DW},${dcy} L${laneX},${dcy} L${laneX},${targetY} L${targetEdgeX+2},${targetY}" fill="none" stroke="${C.coral}" stroke-width="2.25" stroke-dasharray="7,5" marker-end="url(#aCoral)"/>` +
+    pill(X+DW+12, dcy-1, 'NO', C.coral, '#FDF0EC') +
+    t(X+DW+12, dcy+26, n1, {anchor:'start', size:11, weight:700, fill:'#B4482B'}) +
+    t(X+DW+12, dcy+40, n2, {anchor:'start', size:11, weight:400, fill:'#B4482B'});
+
+  // Title
+  s += t(450, 32, 'B2B Clinic Onboarding — Process Flow', {size:20, weight:800, fill:C.dark, family:'Raleway, sans-serif'});
+
+  // --- connectors first (drawn under shapes)
+  s += down(134, 170, C.purple, 'aPurple');               // start -> D2
+  s += yes(278, 314);                                      // D2 -> sales intro
+  s += down(374, 410, C.purple, 'aPurple');               // -> D4
+  s += yes(518, 554);                                      // D4 -> presentation
+  s += down(614, 650, C.purple, 'aPurple');               // -> D6
+  s += down(758, 794, C.green, 'aGreen') + pill(X+10, 776, 'NO (default)', C.green, '#E8F4EE'); // D6 -> MOU
+  s += down(854, 890, C.purple, 'aPurple');               // MOU -> follow-up
+  s += down(950, 986, C.purple, 'aPurple');               // -> D9
+  s += yes(1094, 1130);                                    // D9 -> signing
+  s += down(1190, 1226, C.purple, 'aPurple');             // -> D11
+  s += yes(1334, 1370);                                    // D11 -> payment
+  s += down(1430, 1466, C.purple, 'aPurple');             // -> D13
+  s += yes(1574, 1610);                                    // D13 -> completion
+  s += down(1670, 1706, C.purple, 'aPurple');             // -> CS onboarding
+  s += down(1766, 1812, C.purple, 'aPurple') + pill(X+10, 1789, 'AFTER 6 MONTHS', C.purple, C.lilac);
+
+  // --- "No" loops (each in its own lane; no crossings)
+  s += loop(224, 620, 100, 480, 'Follow-up cadence:', '3·5·7·15 days, then monthly');
+  s += loop(464, 620, 344, 480, 'Nurture on cadence,', 'or disqualify in GHL');
+  s += loop(1040, 620, 930, 480, 'Keep following up:', '3·5·7·15 days, then monthly');
+  s += loop(1280, 720, 906, 480, 'Clarify or revise terms,', 'then reissue for signature');
+  s += loop(1520, 620, 1400, 480, 'Follow up every 48 hrs;', 'escalate delays to BD Director');
+
+  // --- Medical branch (Phase 4, conditional)
+  s += `<path d="M${X+DW},704 L598,704" stroke="${C.pink}" stroke-width="2.25" fill="none" marker-end="url(#aPink)"/>`;
+  s += pill(X+DW+16, 693, 'YES', C.pink, '#FCEEF4');
+  s += `<path d="M730,736 L730,824 L482,824" stroke="${C.pink}" stroke-width="2.25" fill="none" marker-end="url(#aPink)"/>`;
+  s += t(740, 784, 'back to', {anchor:'start', size:11, weight:400, fill:C.pink}) + t(740, 798, 'main flow', {anchor:'start', size:11, weight:400, fill:C.pink});
+  s += `<rect x="600" y="672" width="260" height="64" rx="10" fill="#FCEEF4" stroke="${C.pink}" stroke-width="2"/>`;
+  s += t(730, 699, 'Medical Discussion', {size:14.5, fill:'#8E2A59', family:'Raleway, sans-serif'});
+  s += t(730, 718, 'Account owner attends · keeps ownership', {size:10.5, weight:400, fill:'#8E2A59'});
+  s += `<rect x="600" y="640" width="150" height="22" rx="11" fill="${C.pink}"/>` + t(675, 655, 'PHASE 4 · IF NEEDED', {size:10.5, weight:900, fill:'#fff', family:'JetBrains Mono, monospace'});
+
+  // --- shapes
+  s += term(100, 'Initiate Contact', 'SMS · DSMS · Call · In-person');
+  s += diamond(224, 'Decision-maker', 'reached & interested?');
+  s += box(344, 'Sales Introduction', null, 'Discovery + Clinic Qualification Matrix');
+  s += diamond(464, 'Qualified', '(Tier 1–3 fit)?');
+  s += box(584, 'Product Presentation', null, 'Pricing · value · objections');
+  s += diamond(704, 'Medical discussion', 'needed?');
+  s += box(824, 'MOU / MOA Creation', null, 'Draft · internal approval · send');
+  s += box(920, 'Follow-up & Negotiation', null, 'Cadence 3·5·7·15 days, then monthly');
+  s += diamond(1040, 'Commitment', 'to proceed?');
+  s += box(1160, 'MOU Signing', null, 'Signatures · tag "Won" in GHL');
+  s += diamond(1280, 'MOU fully', 'signed?');
+  s += box(1400, 'Payment & Delivery', 'Terms Confirmation');
+  s += diamond(1520, 'Initial payment', 'received?');
+  s += box(1640, 'Onboarding Completion', null, 'Handover Brief · BD Director QA');
+  s += box(1736, 'Clinic Success Onboarding', null, 'Monday handover meeting');
+  s += term(1846, 'CS Full Hand-over', 'Main POC shifts to the CSM');
+
+  // --- phase labels (left column)
+  [[100,'PHASE 1'],[344,'PHASE 2'],[584,'PHASE 3'],[824,'PHASE 5'],[920,'PHASE 6'],[1160,'PHASE 7'],[1400,'PHASE 8'],[1640,'PHASE 9'],[1736,'PHASE 10'],[1846,'PHASE 11']]
+    .forEach(([y,l])=> s += phase(y,l));
+
+  // --- legend
+  const ly = 1922;
+  s += `<rect x="20" y="${ly}" width="860" height="64" rx="10" fill="#FFFFFF" stroke="#E7E2EE"/>`;
+  s += `<line x1="40" y1="${ly+22}" x2="74" y2="${ly+22}" stroke="${C.purple}" stroke-width="2.5" marker-end="url(#aPurple)"/>` + t(84, ly+26, 'Next step', {anchor:'start', size:12.5});
+  s += `<line x1="40" y1="${ly+46}" x2="74" y2="${ly+46}" stroke="${C.green}" stroke-width="2.5" marker-end="url(#aGreen)"/>` + t(84, ly+50, 'Cleared — move forward', {anchor:'start', size:12.5});
+  s += `<line x1="290" y1="${ly+22}" x2="324" y2="${ly+22}" stroke="${C.coral}" stroke-width="2.5" stroke-dasharray="7,5" marker-end="url(#aCoral)"/>` + t(334, ly+26, 'Not yet — act, log in GHL, loop back', {anchor:'start', size:12.5});
+  s += `<line x1="290" y1="${ly+46}" x2="324" y2="${ly+46}" stroke="${C.pink}" stroke-width="2.5" marker-end="url(#aPink)"/>` + t(334, ly+50, 'Conditional Medical branch', {anchor:'start', size:12.5});
+  s += `<polygon points="640,${ly+12} 652,${ly+22} 640,${ly+32} 628,${ly+22}" fill="${C.lilac}" stroke="${C.lilacLine}" stroke-width="1.5"/>` + t(662, ly+26, 'Decision point', {anchor:'start', size:12.5});
+  s += `<rect x="628" y="${ly+38}" width="24" height="16" rx="4" fill="${C.purple}"/>` + t(662, ly+50, 'Process step', {anchor:'start', size:12.5});
+
+  document.getElementById('flowContent').innerHTML = s;
+}
+
+/* ============================================================
+   GANTT
+   ============================================================ */
+const pct = d => ((d-1)/CYCLE_DAYS*100).toFixed(3);              // left edge of day d
+const span = (a,b) => ((b-a+1)/CYCLE_DAYS*100).toFixed(3);       // width covering days a..b
+function trackBg(){
+  let h = '<div class="track-bg">';
+  for(let w=0; w<7; w++){
+    const a = w*7+1, b = Math.min(w*7+7, CYCLE_DAYS);
+    h += `<div class="wkband ${w%2?'alt':''}" style="left:${pct(a)}%; width:${span(a,b)}%;"></div>`;
+  }
+  return h + '</div>';
+}
+function renderGantt(){
+  let r = '';
+  for(let w=0; w<7; w++){
+    const a = w*7+1, b = Math.min(w*7+7, CYCLE_DAYS);
+    r += `<div class="wk" style="left:${pct(a)}%; width:${span(a,b)}%;">WK ${w+1}</div>`;
+  }
+  [1,5,10,15,20,25,30,35,40,45].forEach(d=>{ r += `<span class="dy" style="left:calc(${pct(d)}% + ${(100/CYCLE_DAYS/2).toFixed(3)}%);">D${d}</span>`; });
+  document.getElementById('ganttRuler').innerHTML = r;
+
+  let total = 0;
+  document.getElementById('ganttBody').innerHTML = PHASES.map(p=>{
+    total += p.tasks.length + p.deliverables.length;
+    const cls = p.conditional ? 'cond' : p.post ? 'post' : '';
+    const win = p.post ? p.postLabel : `Day ${p.start}–${p.end} · ${p.end-p.start+1} days`;
+    const widthNum = p.post ? 0 : (p.end-p.start+1)/CYCLE_DAYS*100;
+    const bar = p.post
+      ? `<div class="g-bar post" style="width:24%;"><span>→ ${esc(p.postLabel)}</span></div>`
+      : `<div class="g-bar ${cls}" style="left:${pct(p.start)}%; width:${span(p.start,p.end)}%;" title="${escAttr(p.title)} — Day ${p.start}–${p.end}">${widthNum>=22?`<span>${esc(p.title)}</span>`:''}</div>`;
+    const taskRows = p.tasks.map(tk=>{
+      const tb = p.post ? `<div class="g-post-note">After the 45-day cycle</div>`
+        : `<div class="g-tbar ${p.conditional?'cond':''}" style="left:${pct(tk.s)}%; width:${span(tk.s,tk.e)}%;" title="Day ${tk.s}${tk.e!==tk.s?'–'+tk.e:''}"></div>`;
+      const when = p.post ? '' : `Day ${tk.s}${tk.e!==tk.s?'–'+tk.e:''} · `;
+      return `<div class="g-grid g-task"><div class="g-task-label">${esc(tk.t)}<span class="eff">${when}<i>${esc(tk.eff)}</i></span></div><div class="track">${trackBg()}${tb}</div></div>`;
+    }).join('');
+    const delRows = p.deliverables.map(d=>{
+      const mark = p.post ? `<div class="g-post-note">${esc(d.dueLabel)}</div>` : `<div class="g-dmark" style="left:calc(${pct(d.due)}% + ${(100/CYCLE_DAYS/2).toFixed(3)}%);" title="Due Day ${d.due}"></div>`;
+      return `<div class="g-grid g-task"><div class="g-task-label">${esc(d.t)}<span class="eff">Due ${p.post?esc(d.dueLabel):'Day '+d.due}</span></div><div class="track">${trackBg()}${mark}</div></div>`;
+    }).join('');
+    return `
+    <div class="g-row" data-phase="${p.num}">
+      <div class="g-grid">
+        <div class="g-label" onclick="this.closest('.g-row').classList.toggle('open')">
+          <span class="g-chev">▶</span>
+          <span><span class="g-phase ${cls}">P${p.num}</span><span class="g-window">${esc(win)}</span>
+            <span class="g-title">${esc(p.title)}</span><span class="g-owner">${esc(p.owner)}</span></span>
+        </div>
+        <div class="track g-track">${trackBg()}${bar}</div>
+      </div>
+      <div class="g-sub">
+        <div class="g-sub-head">Tasks</div>${taskRows}
+        <div class="g-sub-head">Deliverables</div>${delRows}
+      </div>
+    </div>`;
+  }).join('');
+  document.getElementById('ganttItemCount').textContent = `${total} tasks & deliverables`;
+}
+document.getElementById('ganttExpandAll').addEventListener('click', ()=>document.querySelectorAll('.g-row').forEach(r=>r.classList.add('open')));
+document.getElementById('ganttCollapseAll').addEventListener('click', ()=>document.querySelectorAll('.g-row').forEach(r=>r.classList.remove('open')));
+
+/* ============================================================
+   CHECKLIST
+   ============================================================ */
+function renderChecklistSidebar(){
+  const q = (document.getElementById('acctSearch').value||'').toLowerCase();
+  const list = document.getElementById('acctList');
+  const filtered = state.accounts.filter(a=>a.name.toLowerCase().includes(q) || (a.owner||'').toLowerCase().includes(q));
+  if(!filtered.length){
+    list.innerHTML = `<div class="empty-state" style="padding:26px 8px;"><div class="em-icon">🗂️</div><div>${state.accounts.length?'No accounts match your search.':'No accounts yet. Create the first one.'}</div></div>`;
+    return;
+  }
+  list.innerHTML = filtered.map(a=>{
+    const st = state.checklistCache[a.id] ? computeStats(a) : null;
+    const status = st ? statusOf(a, st) : null;
+    return `
+    <div class="acct-item ${a.id===state.activeAccountId?'active':''}" onclick="selectAccount('${a.id}')">
+      <div class="acct-item-top">
+        <div><div class="acct-item-name">${esc(a.name)}</div><div class="acct-item-owner">${esc(a.owner||'Unassigned')}${a.territory?' · '+esc(a.territory):''}</div></div>
+        ${status && status.key!=='progress' ? `<span class="badge ${status.cls}">${status.label}</span>` : ''}
+      </div>
+      <div class="acct-item-bar"><div class="acct-item-bar-fill" style="width:${st?st.percent:0}%"></div></div>
+      <div class="acct-item-pct">${st ? `${st.completed}/${st.total} · ${st.percent}%${st.currentPhase?' · Phase '+st.currentPhase:''}` : 'Loading…'}</div>
+    </div>`;
+  }).join('');
+}
+async function selectAccount(id){
+  state.activeAccountId = id;
+  document.getElementById('detailEmpty').style.display='none';
+  document.getElementById('detailContent').style.display='block';
+  await getChecklist(id);
+  renderChecklistSidebar(); renderAccountDetail();
+}
+function renderAccountDetail(){
+  const account = state.accounts.find(a=>a.id===state.activeAccountId);
+  if(!account) return;
+  const cl = state.checklistCache[account.id];
+  const st = computeStats(account); const status = statusOf(account, st);
+  const groups = {};
+  cl.items.forEach(it=>{
+    const k = it.phaseNum ?? 'custom';
+    if(!groups[k]) groups[k] = {phaseNum:it.phaseNum, phaseTitle:it.phaseTitle||'Custom items', items:[]};
+    groups[k].items.push(it);
+  });
+  const keys = Object.keys(groups).sort((a,b)=> a==='custom'?1 : b==='custom'?-1 : Number(a)-Number(b));
+
+  document.getElementById('detailContent').innerHTML = `
+    <div class="detail-head">
+      <div class="detail-title">
+        <h2>${esc(account.name)}</h2>
+        <div class="detail-meta">Owner: ${esc(account.owner||'Unassigned')}${account.territory?' · '+esc(account.territory):''} · Created ${fmtDate(account.createdAt)}</div>
+      </div>
+      <div class="detail-actions">
+        <span class="badge ${status.cls}">${status.label}</span>
+        <button class="btn btn-ghost btn-sm" onclick="openEditAccount('${account.id}')">✎ Edit details</button>
+        <button class="btn btn-ghost btn-sm" onclick="copyForCRM('${account.id}')" title="Copy the whole checklist">⧉ Copy all for CRM</button>
+        ${canPrint(account, st) ? `<button class="btn btn-primary btn-sm" onclick="printChecklist('${account.id}')" title="Print for the Clinic Success handover brief">🖨 Print checklist</button>` : ''}
+        <button class="icon-btn danger" title="Delete account (password)" onclick="deleteAccount('${account.id}')">🗑</button>
+      </div>
+      <div class="acct-details" style="flex-basis:100%;">
+        ${accountDetailFields(account).map(([label,val])=>`<div><span>${label}</span>${val ? esc(val) : '<em class="empty">Not set</em>'}</div>`).join('')}
+      </div>
+    </div>
+    <div class="detail-progress-wrap">
+      <div class="progress-label"><span>${st.completed} of ${st.total} applicable items complete${st.currentPhase?` · now in Phase ${st.currentPhase}`:''}</span><span class="mono">${st.percent}%</span></div>
+      <div class="progress-big"><div class="progress-big-fill" style="width:${st.percent}%"></div></div>
+      ${st.missingInitials ? `<div class="warn-line">⚠ ${st.missingInitials} completed item${st.missingInitials>1?'s are':' is'} still awaiting supervisor initials.</div>` : ''}
+    </div>
+    ${status.key==='ready' ? `<div class="banner banner-ready"><div><strong>Phases 1–9 complete.</strong><br><span>This account is ready to endorse to Clinic Success (Phase 10). Print the checklist for the handover brief.</span></div><button class="btn btn-accent btn-sm" onclick="endorseAccount('${account.id}')">Endorse to Clinic Success</button></div>` : ''}
+    ${status.key==='endorsed' ? `<div class="banner banner-endorsed">✓ Endorsed to Clinic Success on ${fmtDate(account.endorsedAt)} — complete Phases 10–11 to close the account out.</div>` : ''}
+    ${status.key==='complete' ? `<div class="banner banner-complete">✓ Fully handed over — clinic transitioned out of the sales pipeline.</div>` : ''}
+    <div class="checklist-body">
+      <div class="col-head"><span></span><span>Task / deliverable</span><span>Date completed</span><span>Confirmed by</span><span></span></div>
+      ${keys.map(k=>{
+        const g = groups[k];
+        const na = g.phaseNum===4 && !account.medicalRequired;
+        const gItems = g.items;
+        const done = gItems.filter(i=>i.completed).length;
+        const open = state.openPhaseIds.has(account.id+'-'+k);
+        const allDone = !na && gItems.length && done===gItems.length;
+        return `
+        <div class="phase-block ${open?'open':''} ${na?'na':''}">
+          <div class="phase-block-head" onclick="togglePhaseBlock('${account.id}','${k}')">
+            <div style="display:flex; align-items:center; gap:10px;"><span class="chev">▶</span>
+              <strong style="font-size:13px;">${g.phaseNum?'Phase '+g.phaseNum+' — ':''}${esc(g.phaseTitle)}</strong></div>
+            <div class="phase-head-right">
+              ${!na && done>0 ? `<button class="btn btn-ghost btn-xs" title="Copy this phase's completed items for the CRM" onclick="event.stopPropagation(); copyPhase('${account.id}','${k}')">⧉ Copy completed</button>` : ''}
+              <span class="phase-block-count ${allDone?'done':''}">${na ? 'Not required' : `${done}/${gItems.length}${allDone?' ✓':''}`}</span>
+            </div>
+          </div>
+          <div class="phase-block-body">
+            ${g.phaseNum===4 ? `<label class="na-toggle"><input type="checkbox" ${account.medicalRequired?'checked':''} onchange="setMedicalRequired('${account.id}', this.checked)"> Medical Discussion required for this account (set from the Phase 3 decision). When unticked, this phase is excluded from progress.</label>` : ''}
+            ${gItems.map(it=>`
+              <div class="item-row ${na?'disabled':''}">
+                <input type="checkbox" ${it.completed?'checked':''} onchange="toggleItem('${account.id}','${it.id}',this.checked)" aria-label="Mark complete">
+                <div class="item-text ${it.completed?'done':''}">${esc(it.text)} <span class="pill pill-${it.type}">${it.type}</span></div>
+                <input type="date" class="item-date" value="${esc(it.completedDate||'')}" onchange="setItemDate('${account.id}','${it.id}',this.value)" title="Date completed">
+                <input type="text" class="item-init ${it.completed && !String(it.confirmedBy||'').trim()?'missing':''}" maxlength="6" placeholder="Initials" value="${esc(it.confirmedBy||'')}" onchange="setItemInitials('${account.id}','${it.id}',this.value)" title="Supervisor initials">
+                <button class="icon-btn danger item-remove" title="Remove item (password)" onclick="removeItem('${account.id}','${it.id}')">✕</button>
+              </div>`).join('')}
+            <div class="add-item-row">
+              <input type="text" placeholder="Add a task or deliverable…" id="addinput-${account.id}-${k}" onkeydown="if(event.key==='Enter') addItem('${account.id}', ${g.phaseNum ?? 'null'}, '${k}')">
+              <select id="addtype-${account.id}-${k}"><option value="task">Task</option><option value="deliverable">Deliverable</option></select>
+              <button class="btn btn-ghost btn-sm" onclick="addItem('${account.id}', ${g.phaseNum ?? 'null'}, '${k}')">Add</button>
+            </div>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+function togglePhaseBlock(id, k){
+  const key = id+'-'+k;
+  state.openPhaseIds.has(key) ? state.openPhaseIds.delete(key) : state.openPhaseIds.add(key);
+  renderAccountDetail();
+}
+function refreshAll(){ renderAccountDetail(); renderChecklistSidebar(); refreshDashboard(); }
+function findItem(aid, iid){ return state.checklistCache[aid].items.find(i=>i.id===iid); }
+async function toggleItem(aid, iid, checked){
+  const account = state.accounts.find(a=>a.id===aid);
+  const before = statusOf(account, computeStats(account)).key;
+  const it = findItem(aid, iid); if(!it) return;
+  it.completed = checked;
+  if(checked && !it.completedDate) it.completedDate = todayISO();
+  if(!checked){ it.completedDate = ''; it.confirmedBy = ''; }
+  refreshAll(); await saveItem(aid, it);
+  const after = statusOf(account, computeStats(account)).key;
+  if(after==='ready' && before!=='ready') toast(`🎉 ${account.name} is ready to endorse to Clinic Success`, 'warn');
+  if(checked) toast('Marked complete — add the supervisor\'s initials to confirm.');
+}
+async function setItemDate(aid, iid, val){
+  const it = findItem(aid, iid); if(!it) return;
+  it.completedDate = val;
+  const wasDone = it.completed;
+  if(val && !it.completed) it.completed = true;
+  await saveItem(aid, it);
+  if(!wasDone && it.completed) refreshAll();
+}
+async function setItemInitials(aid, iid, val){
+  const it = findItem(aid, iid); if(!it) return;
+  it.confirmedBy = val.trim().toUpperCase();
+  refreshAll(); await saveItem(aid, it);
+}
+async function setMedicalRequired(aid, val){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  account.medicalRequired = val; refreshAll(); await saveAccount(account);
+}
+async function addItem(aid, phaseNum, k){
+  const input = document.getElementById(`addinput-${aid}-${k}`);
+  const type = document.getElementById(`addtype-${aid}-${k}`).value;
+  const text = input.value.trim(); if(!text) return;
+  const meta = phaseNum ? phaseMeta(Number(phaseNum)) : null;
+  const item = {id:uid('it'), order:Date.now(), phaseNum: phaseNum ? Number(phaseNum) : null, phaseTitle: meta ? meta.title : 'Custom items', text, type, completed:false, completedDate:'', confirmedBy:''};
+  state.checklistCache[aid].items.push(item);
+  refreshAll(); await saveItem(aid, item); toast('Item added to this account\'s checklist');
+}
+async function removeItem(aid, iid){
+  const it = findItem(aid, iid); if(!it) return;
+  if(!(await requirePassword(`Remove "${it.text.slice(0,70)}${it.text.length>70?'…':''}" from this account's checklist?`))) return;
+  state.checklistCache[aid].items = state.checklistCache[aid].items.filter(i=>i.id!==iid);
+  refreshAll(); await deleteItemRecord(aid, iid); toast('Item removed');
+}
+async function endorseAccount(aid){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  account.endorsedAt = new Date().toISOString();
+  refreshAll(); updateBell(); await saveAccount(account);
+  toast(`${account.name} endorsed to Clinic Success ✓`, 'success');
+}
+async function deleteAccount(aid){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  if(!(await requirePassword(`Permanently delete "${account.name}" and its checklist?`))) return;
+  state.accounts = state.accounts.filter(a=>a.id!==aid);
+  delete state.checklistCache[aid];
+  await deleteAccountRecords(aid);
+  if(state.activeAccountId===aid){
+    state.activeAccountId = null;
+    document.getElementById('detailEmpty').style.display='block';
+    document.getElementById('detailContent').style.display='none';
+  }
+  renderChecklistSidebar(); refreshDashboard(); toast('Account deleted');
+}
+
+/* Copy for CRM */
+function crmText(account){
+  const cl = state.checklistCache[account.id]; const st = computeStats(account); const status = statusOf(account, st);
+  const L = [];
+  L.push(`B2B ONBOARDING CHECKLIST — ${account.name}`);
+  L.push(`Owner: ${account.owner||'Unassigned'}${account.territory?' | Territory: '+account.territory:''}`);
+  L.push(`Clinics/branches: ${account.branches||'—'} | Other branch locations: ${account.branchAreas||'—'}`);
+  L.push(`Specialty/vertical: ${account.specialty||'—'} | CSM assigned: ${account.csm||'—'}`);
+  L.push(`Status: ${status.label} | Progress: ${st.completed}/${st.total} (${st.percent}%)${st.currentPhase?' | Current phase: '+st.currentPhase:''}`);
+  L.push(`Medical Discussion required: ${account.medicalRequired?'Yes':'No'}`);
+  if(account.endorsedAt) L.push(`Endorsed to Clinic Success: ${fmtDate(account.endorsedAt)}`);
+  L.push(`Created: ${fmtDate(account.createdAt)} | Copied: ${fmtDate(todayISO())}`);
+  const groups = {};
+  cl.items.forEach(it=>{ const k = it.phaseNum ?? 'custom'; (groups[k] = groups[k] || {title: it.phaseNum ? `PHASE ${it.phaseNum} — ${it.phaseTitle}` : 'CUSTOM ITEMS', num:it.phaseNum, items:[]}).items.push(it); });
+  Object.keys(groups).sort((a,b)=> a==='custom'?1 : b==='custom'?-1 : Number(a)-Number(b)).forEach(k=>{
+    const g = groups[k]; const na = g.num===4 && !account.medicalRequired;
+    L.push(''); L.push(`${g.title}${na?' (NOT REQUIRED)':` (${g.items.filter(i=>i.completed).length}/${g.items.length})`}`);
+    g.items.forEach(it=>{
+      const box = na ? '[n/a]' : it.completed ? '[x]' : '[ ]';
+      const det = it.completed ? ` — Completed ${it.completedDate?fmtDate(it.completedDate):'(no date)'} | Confirmed by: ${it.confirmedBy||'(pending)'}` : '';
+      L.push(`${box} ${it.type==='deliverable'?'Deliverable':'Task'}: ${it.text}${det}`);
+    });
+  });
+  return L.join('\n');
+}
+async function copyText(text, okMsg){
+  try{ await navigator.clipboard.writeText(text); toast(okMsg, 'success'); return; }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = text; ta.style.position='fixed'; ta.style.opacity='0';
+    document.body.appendChild(ta); ta.select();
+    try{ document.execCommand('copy'); toast(okMsg, 'success'); }
+    catch(e2){ toast('Copy failed — your browser blocked clipboard access.', 'error'); }
+    ta.remove();
+  }
+}
+async function copyForCRM(aid){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  await copyText(crmText(account), 'Full checklist copied — paste it into the CRM.');
+}
+async function copyPhase(aid, k){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  const items = state.checklistCache[aid].items.filter(i=>String(i.phaseNum ?? 'custom')===String(k));
+  const done = items.filter(i=>i.completed);
+  if(!done.length){ toast('No completed items in this phase yet.', 'warn'); return; }
+  const title = k==='custom' ? 'Custom items' : `Phase ${k} — ${items[0].phaseTitle}`;
+  const L = [`${account.name} — ${title}`, `COMPLETED: ${done.length} of ${items.length}${done.length===items.length?' (phase complete)':''}`, ''];
+  done.forEach(it=> L.push(`✓ ${it.type==='deliverable'?'Deliverable':'Task'}: ${it.text} — Completed ${it.completedDate?fmtDate(it.completedDate):'(no date)'} | Confirmed by: ${it.confirmedBy||'(pending)'}`));
+  L.push('', `Account owner: ${account.owner||'Unassigned'} | Copied: ${fmtDate(todayISO())}`);
+  await copyText(L.join('\n'), `${title}: ${done.length} completed item${done.length>1?'s':''} copied.`);
+}
+
+/* Account details */
+function accountDetailFields(a){
+  return [
+    ['Territory', a.territory], ['Account owner', a.owner], ['Clinics / branches', a.branches ? String(a.branches) : ''],
+    ['Other branch locations', a.branchAreas], ['Specialty / vertical', a.specialty], ['CSM assigned', a.csm],
+  ];
+}
+let editingAccountId = null;
+function fillAccountForm(a){
+  const v = (id,val)=>{ document.getElementById(id).value = val ?? ''; };
+  v('newAcctName', a.name); v('newAcctOwner', a.owner); v('newAcctTerritory', a.territory);
+  v('newAcctBranches', a.branches); v('newAcctBranchAreas', a.branchAreas); v('newAcctSpecialty', a.specialty); v('newAcctCsm', a.csm);
+}
+function readAccountForm(){
+  const g = id => document.getElementById(id).value.trim();
+  const br = g('newAcctBranches');
+  return { name:g('newAcctName'), owner:g('newAcctOwner'), territory:document.getElementById('newAcctTerritory').value,
+           branches: br ? Math.max(1, parseInt(br,10)||1) : '', branchAreas:g('newAcctBranchAreas'), specialty:g('newAcctSpecialty'), csm:g('newAcctCsm') };
+}
+function openEditAccount(aid){
+  const a = state.accounts.find(x=>x.id===aid); if(!a) return;
+  editingAccountId = aid; fillAccountForm(a);
+  document.getElementById('acctModalTitle').textContent = 'Edit account details';
+  document.getElementById('createAcctBtn').textContent = 'Save changes';
+  openModal('newAcctModal'); setTimeout(()=>document.getElementById('newAcctName').focus(),50);
+}
+
+/* Print (handover brief) */
+function canPrint(account, st){ return st.preDone || !!account.endorsedAt; }
+function printChecklist(aid){
+  const account = state.accounts.find(a=>a.id===aid); if(!account) return;
+  const st = computeStats(account); const status = statusOf(account, st);
+  if(!canPrint(account, st)){ toast('Printing unlocks once Phases 1–9 are complete.', 'warn'); return; }
+  const cl = state.checklistCache[aid];
+  const groups = {};
+  cl.items.forEach(it=>{ const k = it.phaseNum ?? 'custom'; (groups[k] = groups[k] || {num:it.phaseNum, title:it.phaseTitle||'Custom items', items:[]}).items.push(it); });
+  const keys = Object.keys(groups).sort((a,b)=> a==='custom'?1 : b==='custom'?-1 : Number(a)-Number(b));
+  let n = 0;
+  const rows = keys.map(k=>{
+    const g = groups[k]; const na = g.num===4 && !account.medicalRequired;
+    const done = g.items.filter(i=>i.completed).length;
+    return `<tr class="phase-row"><td colspan="7">${g.num?'Phase '+g.num+' — ':''}${esc(g.title)} &nbsp;·&nbsp; ${na?'Not required':done+' of '+g.items.length+' complete'}</td></tr>` +
+      g.items.map(it=>{ n++;
+        const stt = na ? '<span class="st-na">N/A</span>' : it.completed ? '<span class="st-done">Completed</span>' : '<span class="st-pending">Pending</span>';
+        return `<tr><td>${n}</td><td>${g.num?'Phase '+g.num:'Custom'}</td><td>${it.type==='deliverable'?'Deliverable':'Task'}</td><td>${esc(it.text)}</td><td>${stt}</td><td>${it.completedDate&&!na?esc(fmtDate(it.completedDate)):''}</td><td>${!na?esc(it.confirmedBy||''):''}</td></tr>`;
+      }).join('');
+  }).join('');
+  const kv = [
+    ['Clinic / partner', account.name], ['Status', status.label],
+    ['Account owner', account.owner||'Unassigned'], ['Territory', account.territory||'—'],
+    ['Clinics / branches', account.branches||'—'], ['Other branch locations', account.branchAreas||'—'],
+    ['Specialty / vertical', account.specialty||'—'], ['CSM assigned', account.csm||'—'],
+    ['Medical Discussion required', account.medicalRequired?'Yes':'No'], ['Progress', `${st.completed} of ${st.total} applicable items (${st.percent}%)`],
+    ['Account created', fmtDate(account.createdAt)], ['Endorsed to Clinic Success', account.endorsedAt?fmtDate(account.endorsedAt):'Not yet endorsed'],
+  ];
+  let kvRows = ''; for(let i=0;i<kv.length;i+=2){ kvRows += `<tr><td>${esc(kv[i][0])}</td><td>${esc(kv[i][1])}</td><td>${esc(kv[i+1][0])}</td><td>${esc(kv[i+1][1])}</td></tr>`; }
+  document.getElementById('printArea').innerHTML = `
+    <div class="p-head">
+      <div><div class="p-brand">REGENESYS · B2B AFFILIATE &amp; PARTNERSHIPS</div><h1>Clinic Onboarding Checklist — Handover to Clinic Success</h1></div>
+      <div class="p-sub">Printed ${esc(fmtDate(todayISO()))}<br>${esc(account.name)}</div>
+    </div>
+    <table class="kv"><tbody>${kvRows}</tbody></table>
+    <table>
+      <thead><tr><th style="width:3%;">#</th><th style="width:7%;">Phase</th><th style="width:8%;">Type</th><th>Task / deliverable</th><th style="width:8%;">Status</th><th style="width:11%;">Date completed</th><th style="width:9%;">Confirmed by</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>
+    <div class="sign">
+      <div><b>Prepared by (account owner)</b>Name, signature &amp; date</div>
+      <div><b>QA reviewed by (BD Director)</b>Name, signature &amp; date</div>
+      <div><b>Received by (Clinic Success)</b>Name, signature &amp; date</div>
+    </div>`;
+  setTimeout(()=>window.print(), 50);
+}
+
+/* New account */
+document.getElementById('newAccountBtn').addEventListener('click', ()=>{
+  if(DB.mode==='connecting'){ toast('Still connecting to the shared database — try again in a moment.', 'warn'); return; }
+  editingAccountId = null; fillAccountForm({});
+  document.getElementById('acctModalTitle').textContent = 'New account';
+  document.getElementById('createAcctBtn').textContent = 'Create account';
+  openModal('newAcctModal'); setTimeout(()=>document.getElementById('newAcctName').focus(),50);
+});
+document.querySelectorAll('[data-close-modal]').forEach(b=>b.addEventListener('click', ()=>closeModal(b.getAttribute('data-close-modal'))));
+document.getElementById('createAcctBtn').addEventListener('click', async ()=>{
+  const f = readAccountForm(); const name = f.name;
+  if(!name){ toast('Enter a clinic name', 'warn'); return; }
+  if(editingAccountId){
+    const a = state.accounts.find(x=>x.id===editingAccountId);
+    if(!a){ closeModal('newAcctModal'); return; }
+    Object.assign(a, f); editingAccountId = null;
+    closeModal('newAcctModal'); refreshAll(); await saveAccount(a);
+    toast('Account details updated'); return;
+  }
+  const account = {id:uid('acct'), ...f, createdAt:new Date().toISOString(), endorsedAt:null, medicalRequired:false};
+  state.accounts.push(account);
+  await createChecklist(account.id, seedItemsFromLibrary());
+  await saveAccount(account);
+  closeModal('newAcctModal'); await selectAccount(account.id); refreshDashboard();
+  toast(`${name} added to the pipeline`);
+});
+document.getElementById('acctSearch').addEventListener('input', renderChecklistSidebar);
+document.getElementById('exportExcelBtnChecklist').addEventListener('click', exportToExcel);
+document.getElementById('exportExcelBtnDashboard').addEventListener('click', exportToExcel);
+
+/* Template manager */
+document.getElementById('openLibraryBtn').addEventListener('click', ()=>{ renderLibraryModal(); openModal('libraryModal'); });
+function renderLibraryModal(){
+  document.getElementById('libraryPhases').innerHTML = state.library.phases.map(ph=>`
+    <div class="lib-phase">
+      <h4>Phase ${ph.phaseNum} — ${esc(ph.phaseTitle)}</h4>
+      ${ph.items.map(it=>`<div class="lib-item-row"><span class="pill pill-${it.type}">${it.type}</span><span class="txt">${esc(it.text)}</span><button class="icon-btn danger" title="Remove (password)" onclick="removeLibraryItem(${ph.phaseNum},'${it.id}')">✕</button></div>`).join('')}
+      <div class="add-item-row">
+        <input type="text" placeholder="Add default item to this phase…" id="libadd-${ph.phaseNum}">
+        <select id="libtype-${ph.phaseNum}"><option value="task">Task</option><option value="deliverable">Deliverable</option></select>
+        <button class="btn btn-ghost btn-sm" onclick="addLibraryItem(${ph.phaseNum})">Add</button>
+      </div>
+    </div>`).join('');
+}
+async function addLibraryItem(n){
+  const input = document.getElementById('libadd-'+n); const text = input.value.trim(); if(!text) return;
+  state.library.phases.find(p=>p.phaseNum===n).items.push({id:uid('lib'), text, type:document.getElementById('libtype-'+n).value});
+  await saveLibrary(); renderLibraryModal(); toast('Added to template — applies to new accounts');
+}
+async function removeLibraryItem(n, iid){
+  if(!(await requirePassword('Remove this item from the default checklist template?'))) return;
+  const ph = state.library.phases.find(p=>p.phaseNum===n); ph.items = ph.items.filter(i=>i.id!==iid);
+  await saveLibrary(); renderLibraryModal();
+}
+document.getElementById('resetTemplateBtn').addEventListener('click', async ()=>{
+  if(!(await requirePassword('Restore the default template? Custom template items will be removed (existing accounts are not affected).'))) return;
+  state.library = buildDefaultLibrary(); await saveLibrary(); renderLibraryModal(); toast('Default template restored');
+});
+
+/* ============================================================
+   DASHBOARD
+   ============================================================ */
+async function renderDashboard(){ await Promise.all(state.accounts.map(a=>getChecklist(a.id))); refreshDashboard(); }
+function refreshDashboard(){
+  const rows = state.accounts.filter(a=>state.checklistCache[a.id]).map(a=>{ const st = computeStats(a); return {a, st, status:statusOf(a, st)}; });
+  const total = rows.length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statAvg').textContent = (total ? Math.round(rows.reduce((s,r)=>s+r.st.percent,0)/total) : 0) + '%';
+  const ready = rows.filter(r=>r.status.key==='ready');
+  document.getElementById('statReady').textContent = ready.length;
+  document.getElementById('statEndorsed').textContent = rows.filter(r=>r.a.endorsedAt).length;
+  const sec = document.getElementById('alertsSection');
+  sec.style.display = ready.length ? 'block' : 'none';
+  document.getElementById('alertCards').innerHTML = ready.map(r=>`
+    <div class="alert-card"><div class="alert-card-name">${esc(r.a.name)}</div><div class="alert-card-owner">${esc(r.a.owner||'Unassigned')} · Phases 1–9 complete</div>
+    <button class="btn btn-accent btn-sm" onclick="endorseAccount('${r.a.id}')">Endorse to Clinic Success</button></div>`).join('');
+  document.getElementById('dashTableBody').innerHTML = rows.length ? rows.map(({a,st,status})=>`
+    <tr style="cursor:pointer;" onclick="jumpToAccount('${a.id}')">
+      <td><strong>${esc(a.name)}</strong></td>
+      <td>${esc(a.territory||'—')}</td>
+      <td>${esc(a.specialty||'—')}</td>
+      <td>${esc(a.owner||'—')}</td>
+      <td>${esc(a.csm||'—')}</td>
+      <td>${st.currentPhase ? 'Phase '+st.currentPhase : '—'}</td>
+      <td><div class="mini-stepper" title="Phases 1–11">${st.phaseStatus.map((s,i)=>`<div class="mini-seg ${s==='done'?'done':s==='na'?'na':''}" title="Phase ${i+1}${s==='na'?' (not required)':''}"></div>`).join('')}</div></td>
+      <td class="mono">${st.completed}/${st.total}</td>
+      <td class="mono">${st.percent}%</td>
+      <td class="mono" style="color:${st.missingInitials?'var(--warning)':'var(--muted)'};">${st.missingInitials}</td>
+      <td><span class="badge ${status.cls}">${status.label}</span></td>
+      <td>${fmtDate(a.createdAt)}</td>
+      <td style="white-space:nowrap;"><button class="btn btn-ghost btn-sm" onclick="event.stopPropagation(); jumpToAccount('${a.id}')">View</button>
+        <button class="icon-btn danger" title="Delete account (password)" onclick="event.stopPropagation(); deleteAccount('${a.id}')">🗑</button></td>
+    </tr>`).join('') : `<tr><td colspan="13" style="text-align:center; color:var(--muted); padding:30px;">No accounts yet — add one from the Checklist tab.</td></tr>`;
+  updateBell();
+}
+function jumpToAccount(id){ switchTab('checklist'); selectAccount(id); }
+
+/* ============================================================
+   EXCEL EXPORT
+   ============================================================ */
+async function exportToExcel(){
+  if(typeof XLSX==='undefined'){ toast('Excel library failed to load — check your internet connection and try again.', 'warn'); return; }
+  if(!state.accounts.length){ toast('No accounts to export yet.', 'warn'); return; }
+  await Promise.all(state.accounts.map(a=>getChecklist(a.id)));
+  const dash = state.accounts.map(a=>{ const st = computeStats(a); const s = statusOf(a, st); return {
+    'Clinic':a.name, 'Territory':a.territory||'', 'Owner':a.owner||'Unassigned', 'Clinics/Branches':a.branches||'', 'Other Branch Locations':a.branchAreas||'', 'Specialty/Vertical':a.specialty||'', 'CSM Assigned':a.csm||'', 'Current Phase': st.currentPhase?`Phase ${st.currentPhase}`:'Done',
+    'Medical Discussion Required': a.medicalRequired?'Yes':'No', 'Completed Items':st.completed, 'Applicable Items':st.total, '% Complete':st.percent,
+    'Awaiting Supervisor Initials':st.missingInitials, 'Status':s.label, 'Created':fmtDate(a.createdAt), 'Endorsed On':a.endorsedAt?fmtDate(a.endorsedAt):'' }; });
+  const n = dash.length;
+  const avg = n ? Math.round(dash.reduce((s,r)=>s+r['% Complete'],0)/n) : 0;
+  dash.push({});
+  dash.push({'Clinic':'Total accounts','Territory':n});
+  dash.push({'Clinic':'Average completion','Territory':avg+'%'});
+  dash.push({'Clinic':'Ready to endorse','Territory':dash.filter(r=>r['Status']==='Ready to endorse').length});
+  dash.push({'Clinic':'Endorsed to CS','Territory':state.accounts.filter(a=>a.endorsedAt).length});
+  const rows = [];
+  state.accounts.forEach(a=>{ state.checklistCache[a.id].items.forEach(it=>{ const na = !isApplicable(it,a); rows.push({
+    'Clinic':a.name, 'Territory':a.territory||'', 'Owner':a.owner||'Unassigned', 'Phase': it.phaseNum!=null?`Phase ${it.phaseNum}`:'Custom', 'Phase Title':it.phaseTitle||'',
+    'Item Type': it.type==='deliverable'?'Deliverable':'Task', 'Item':it.text, 'Completed': na?'N/A':(it.completed?'Yes':'No'),
+    'Date Completed': it.completedDate?fmtDate(it.completedDate):'', 'Confirmed By (Supervisor)': it.confirmedBy||'' }); }); });
+  const wb = XLSX.utils.book_new();
+  const ws1 = XLSX.utils.json_to_sheet(dash);
+  ws1['!cols'] = [{wch:28},{wch:16},{wch:18},{wch:10},{wch:28},{wch:20},{wch:18},{wch:13},{wch:12},{wch:10},{wch:10},{wch:10},{wch:14},{wch:18},{wch:14},{wch:14}];
+  XLSX.utils.book_append_sheet(wb, ws1, 'Dashboard');
+  const ws2 = XLSX.utils.json_to_sheet(rows);
+  ws2['!cols'] = [{wch:28},{wch:14},{wch:18},{wch:10},{wch:34},{wch:12},{wch:60},{wch:10},{wch:15},{wch:16}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Checklist');
+  XLSX.writeFile(wb, `Regenesys_B2B_Onboarding_${todayISO()}.xlsx`);
+  toast('Excel file downloaded ✓', 'success');
+}
+
+/* ============================================================
+   BELL + TABS + INIT
+   ============================================================ */
+function updateBell(){
+  const ready = state.accounts.filter(a=>state.checklistCache[a.id] && statusOf(a, computeStats(a)).key==='ready');
+  const badge = document.getElementById('bellBadge');
+  badge.style.display = ready.length ? 'flex' : 'none'; badge.textContent = ready.length;
+  document.getElementById('bellList').innerHTML = ready.length ? ready.map(a=>`
+    <div class="bell-item"><div><div class="bell-item-name">${esc(a.name)}</div><div class="bell-item-owner">${esc(a.owner||'Unassigned')}</div></div>
+    <button class="btn btn-accent btn-sm" onclick="endorseAccount('${a.id}')">Endorse</button></div>`).join('')
+    : `<div class="bell-empty">No pending endorsements right now.</div>`;
+}
+document.getElementById('bellBtn').addEventListener('click', e=>{ e.stopPropagation(); document.getElementById('bellPanel').classList.toggle('open'); });
+document.addEventListener('click', e=>{ const p = document.getElementById('bellPanel'); if(!p.contains(e.target) && e.target.id!=='bellBtn') p.classList.remove('open'); });
+function switchTab(tab){
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('tab-'+tab).classList.add('active');
+  window.scrollTo({top:0});
+  if(tab==='dashboard') renderDashboard();
+}
+document.querySelectorAll('.nav-tab').forEach(b=>b.addEventListener('click', ()=>switchTab(b.dataset.tab)));
+
+async function initApp(){
+  renderGuide(); renderFlow(); renderGantt();
+  await dbInit();
+  await renderDashboard();
+  renderChecklistSidebar();
+}
+initApp();
+</script>
+</body>
+</html>
